@@ -4,11 +4,11 @@
  */
 require_once 'config.php';
 
-$host = getenv('DB_HOST') ?: getenv('PLANETSCALE_DB_HOST') ?: 'localhost';
-$db = getenv('DB_NAME') ?: getenv('PLANETSCALE_DB') ?: 'blood_predictor';
-$user = getenv('DB_USER') ?: getenv('PLANETSCALE_DB_USERNAME') ?: 'root';
-$pass = getenv('DB_PASS') ?: getenv('PLANETSCALE_DB_PASSWORD') ?: '';
-$port = getenv('DB_PORT') ?: '3306';
+$host = getenv('DB_HOST') ?: getenv('PLANETSCALE_DB_HOST') ?: getenv('MYSQLHOST') ?: 'localhost';
+$db = getenv('DB_NAME') ?: getenv('PLANETSCALE_DB') ?: getenv('MYSQLDATABASE') ?: 'blood_predictor';
+$user = getenv('DB_USER') ?: getenv('PLANETSCALE_DB_USERNAME') ?: getenv('MYSQLUSER') ?: 'root';
+$pass = getenv('DB_PASS') ?: getenv('PLANETSCALE_DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
+$port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
 $sslCa = getenv('DB_SSL_CA') ?: getenv('PLANETSCALE_SSL_CERT_PATH') ?: '';
 $sslVerifyServerCert = getenv('DB_SSL_VERIFY_SERVER_CERT');
 $charset = 'utf8mb4';

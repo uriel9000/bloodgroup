@@ -8,6 +8,7 @@ Recommended order:
 
 1. PlanetScale
 2. TiDB Cloud
+3. Railway MySQL
 
 ## Why PlanetScale Fits This App
 
@@ -22,7 +23,7 @@ That last point is an inference from:
 
 ## Env Vars Supported By The Code
 
-The backend now supports both generic DB vars and PlanetScale-style vars:
+The backend now supports generic DB vars, PlanetScale-style vars, and Railway MySQL vars:
 
 ```env
 DB_HOST=
@@ -42,6 +43,16 @@ PLANETSCALE_DB=
 PLANETSCALE_DB_USERNAME=
 PLANETSCALE_DB_PASSWORD=
 PLANETSCALE_SSL_CERT_PATH=
+```
+
+Or Railway MySQL-style:
+
+```env
+MYSQLHOST=
+MYSQLPORT=
+MYSQLDATABASE=
+MYSQLUSER=
+MYSQLPASSWORD=
 ```
 
 ## Suggested Values
@@ -73,6 +84,24 @@ DB_PASS=<your password>
 DB_SSL_CA=<path to CA cert if required>
 DB_SSL_VERIFY_SERVER_CERT=true
 ```
+
+### Railway MySQL
+
+If your PHP backend is hosted on Railway too, the code can use Railway's built-in MySQL env vars directly:
+
+```env
+MYSQLHOST=
+MYSQLPORT=
+MYSQLDATABASE=
+MYSQLUSER=
+MYSQLPASSWORD=
+```
+
+That is likely the fastest full deployment path for this codebase:
+
+1. Vercel for frontend
+2. Railway for PHP backend
+3. Railway MySQL or PlanetScale for the database
 
 ## Import Notes
 
