@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | BloodGroup Admin Panel</title>
+    <meta name="description" content="Manage admin users, assign roles, and view audit trails.">
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+    <style>
+        .modal-overlay { opacity:0; pointer-events:none; transition:opacity .25s; }
+        .modal-overlay.show { opacity:1; pointer-events:auto; }
+        .modal-box { transform:scale(.95) translateY(10px); transition:transform .25s; }
+        .modal-overlay.show .modal-box { transform:scale(1) translateY(0); }
+        .action-btn { transition:all .15s; }
+        .action-btn:hover { transform:scale(1.07); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col transition-all">
+
+        <div class="px-8 pt-8 pb-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                        <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        User Management
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Control admin access and role assignments</p>
+                </div>
+                <button onclick="openInviteModal()" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-lg shadow-rose-200/40 transition-all action-btn text-sm flex items-center gap-2" data-superadmin>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Invite User
+                </button>
+            </div>
+        </div>
+
+        <div class="px-8 pb-8 flex flex-col gap-6">
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="glass-card p-4 rounded-2xl text-center">
+                    <div class="text-xl font-black text-amber-600">1</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Super Admins</div>
+                </div>
+                <div class="glass-card p-4 rounded-2xl text-center">
+                    <div class="text-xl font-black text-blue-600">3</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Admins</div>
+                </div>
+                <div class="glass-card p-4 rounded-2xl text-center">
+                    <div class="text-xl font-black text-blue-600">4</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Active Users</div>
+                </div>
+            </div>
+
+            <!-- User Table -->
+            <div class="glass-card overflow-hidden">
+                <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                    <div class="flex gap-5">
+                        <button class="tab-usr active text-sm font-black text-rose-600 border-b-2 border-rose-500 pb-1" data-filter="all">All Users</button>
+                        <button class="tab-usr text-sm font-bold text-slate-400 hover:text-slate-600 pb-1 transition-all" data-filter="super_admin">Super Admin</button>
+                        <button class="tab-usr text-sm font-bold text-slate-400 hover:text-slate-600 pb-1 transition-all" data-filter="admin">Admin</button>
+                    </div>
+                    <input type="text" id="user-search" placeholder="Search users..." class="text-sm bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-rose-400 w-44 text-slate-700 dark:text-slate-300">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50/70 dark:bg-slate-800/50">
+                            <tr>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">User</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Role</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Last Login</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Status</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="users-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Audit Trail (Super Admin only) -->
+            <div data-superadmin>
+                <h3 class="text-xl font-black text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Audit Trail
+                    <span class="px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded tracking-wider ml-1">SUPER ADMIN</span>
+                </h3>
+                <div class="glass-card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50/70 dark:bg-slate-800/50">
+                                <tr>
+                                    <th class="px-6 py-3.5 text-xs font-black text-slate-500 dark:text-slate-400">Timestamp</th>
+                                    <th class="px-6 py-3.5 text-xs font-black text-slate-500 dark:text-slate-400">Actor</th>
+                                    <th class="px-6 py-3.5 text-xs font-black text-slate-500 dark:text-slate-400">Action</th>
+                                    <th class="px-6 py-3.5 text-xs font-black text-slate-500 dark:text-slate-400">Target</th>
+                                    <th class="px-6 py-3.5 text-xs font-black text-slate-500 dark:text-slate-400">IP</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="audit-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Invite User Modal -->
+    <div id="invite-modal" class="modal-overlay fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+        <div class="modal-box bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-800">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <h2 class="text-lg font-black text-slate-800 dark:text-white">Invite New User</h2>
+                <button onclick="closeInviteModal()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all">✕</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-1.5">Full Name</label>
+                    <input id="inv-name" type="text" placeholder="e.g. Jane Smith" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-rose-400 text-slate-800 dark:text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-1.5">Email Address</label>
+                    <input id="inv-email" type="email" placeholder="jane@example.com" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-rose-400 text-slate-800 dark:text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-1.5">Assign Role</label>
+                    <select id="inv-role" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-rose-400 text-slate-800 dark:text-white font-bold text-sm">
+                        <option value="admin">Admin</option>
+                        <option value="super_admin">Super Admin</option>
+                    </select>
+                </div>
+                <div id="invite-success" class="hidden p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 rounded-xl text-blue-700 text-sm font-bold text-center">
+                    ✓ Invitation sent!
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex gap-3">
+                <button onclick="closeInviteModal()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 transition-all text-sm">Cancel</button>
+                <button onclick="sendInvite()" class="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-rose-200/40">Send Invite</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const USERS = [
+            { id:1, name:'Super Admin', email:'superadmin@example.com', role:'super_admin', lastLogin:'Just now',  status:'active', initials:'SA' },
+            { id:2, name:'Dr. Sarah Mwale', email:'sarah@bloodbank.com', role:'admin', lastLogin:'2h ago',   status:'active', initials:'SM' },
+            { id:3, name:'James Phiri',     email:'james@bloodbank.com', role:'admin', lastLogin:'1 day ago', status:'active', initials:'JP' },
+            { id:4, name:'Fatima Banda',    email:'fatima@bloodbank.com',role:'admin', lastLogin:'3 days ago',status:'inactive',initials:'FB'},
+        ];
+
+        const AUDIT = [
+            { ts:'2026-03-29 21:00', actor:'Super Admin', action:'Role Changed',    target:'James Phiri',   ip:'192.168.1.10' },
+            { ts:'2026-03-29 18:45', actor:'Super Admin', action:'User Invited',    target:'Fatima Banda',  ip:'192.168.1.10' },
+            { ts:'2026-03-29 14:22', actor:'Dr. Sarah Mwale', action:'Stock Updated', target:'O- Blood Type', ip:'10.0.0.25' },
+            { ts:'2026-03-28 09:03', actor:'Super Admin', action:'Login',           target:'Dashboard',     ip:'192.168.1.10' },
+            { ts:'2026-03-27 16:30', actor:'Dr. Sarah Mwale', action:'Request Approved', target:'O- · 3 units', ip:'10.0.0.25' },
+        ];
+
+        const ACTION_COLORS = {
+            'Role Changed':'bg-purple-100 text-purple-700', 'User Invited':'bg-blue-100 text-blue-700',
+            'Stock Updated':'bg-amber-100 text-amber-700',  'Login':'bg-blue-100 text-blue-700',
+            'Request Approved':'bg-rose-100 text-rose-700'
+        };
+
+        let activeFilter = 'all';
+
+        function renderUsers(filter='all', search='') {
+            const tbody = document.getElementById('users-tbody');
+            const data = USERS.filter(u =>
+                (filter==='all' || u.role===filter) &&
+                (!search || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase()))
+            );
+            tbody.innerHTML = data.map(u => {
+                const isSuper = u.role==='super_admin';
+                const roleBadge = isSuper
+                    ? '<span class="px-2.5 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-lg text-[10px] font-black uppercase tracking-wider border border-amber-200 dark:border-amber-800">Super Admin</span>'
+                    : '<span class="px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase tracking-wider border border-blue-200 dark:border-blue-800">Admin</span>';
+                const statusBadge = u.status==='active'
+                    ? '<span class="px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase tracking-wider">Active</span>'
+                    : '<span class="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-wider">Inactive</span>';
+                return `<tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-all">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${isSuper?'from-amber-400 to-amber-600':'from-blue-400 to-blue-600'} text-white font-black text-sm flex items-center justify-center">${u.initials}</div>
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-white text-sm">${u.name}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">${u.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">${roleBadge}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">${u.lastLogin}</td>
+                    <td class="px-6 py-4">${statusBadge}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <button title="Edit" class="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-blue-100 hover:text-blue-600 transition-all" data-superadmin>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            ${!isSuper ? `<button title="Deactivate" class="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-amber-100 hover:text-amber-600 transition-all" data-superadmin>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            </button>
+                            <button title="Delete" class="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg hover:bg-rose-100 hover:text-rose-600 transition-all" data-superadmin>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>` : ''}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+            if (window.RoleGuard) RoleGuard.apply();
+        }
+
+        function renderAudit() {
+            document.getElementById('audit-tbody').innerHTML = AUDIT.map(a => `
+                <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-all">
+                    <td class="px-6 py-3.5 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">${a.ts}</td>
+                    <td class="px-6 py-3.5 text-sm font-bold text-slate-700 dark:text-slate-300">${a.actor}</td>
+                    <td class="px-6 py-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${ACTION_COLORS[a.action]||'bg-slate-100 text-slate-600'}">${a.action}</span></td>
+                    <td class="px-6 py-3.5 text-sm text-slate-600 dark:text-slate-400">${a.target}</td>
+                    <td class="px-6 py-3.5 text-xs font-mono text-slate-500 dark:text-slate-400">${a.ip}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab-usr').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-usr').forEach(b => { b.classList.remove('active','text-rose-600','border-b-2','border-rose-500'); b.classList.add('text-slate-400'); });
+                btn.classList.add('active','text-rose-600','border-b-2','border-rose-500'); btn.classList.remove('text-slate-400');
+                activeFilter = btn.dataset.filter;
+                renderUsers(activeFilter, document.getElementById('user-search').value);
+            });
+        });
+
+        document.getElementById('user-search').addEventListener('input', e => renderUsers(activeFilter, e.target.value));
+
+        window.openInviteModal  = () => document.getElementById('invite-modal').classList.add('show');
+        window.closeInviteModal = () => document.getElementById('invite-modal').classList.remove('show');
+        window.sendInvite = () => {
+            document.getElementById('invite-success').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('invite-success').classList.add('hidden'); closeInviteModal(); }, 1400);
+        };
+
+        renderUsers();
+        renderAudit();
+    </script>
+</body>
+</html>

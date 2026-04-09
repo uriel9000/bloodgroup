@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base | Admin Panel V3</title>
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <!-- Sidebar Placeholder (injected by layout.js) -->
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col p-8 transition-all">
+        <!-- layout.js injects navbar + footer -->
+
+        <div class="mb-8 mt-4">
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Knowledge Base</h1>
+            <p class="text-slate-500 dark:text-slate-400">Educational genetics content curated with AI.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="knowledge-grid">
+            <!-- Loaded dynamically -->
+        </div>
+    </main>
+
+    <!-- Right Drawer: Edit Info -->
+    <aside id="info-drawer" class="ai-drawer closed fixed right-0 top-0 w-96 h-screen bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-8 flex flex-col">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-xl font-bold text-slate-800 dark:text-white" id="drawer-title">Edit Blood Type</h2>
+            <button onclick="window.closeDrawer()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <form id="edit-form" class="flex-1 overflow-y-auto space-y-6">
+            <input type="hidden" id="edit-id">
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Pros</label>
+                <textarea id="edit-pros" rows="3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500 text-sm dark:text-white"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Cons</label>
+                <textarea id="edit-cons" rows="3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500 text-sm dark:text-white"></textarea>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Educational Note</label>
+                    <div class="flex gap-3">
+                        <button type="button" id="ai-gen-note" class="text-blue-500 text-xs font-bold hover:underline">AI Rewrite</button>
+                        <button type="button" id="copy-note-btn" class="text-slate-400 text-xs font-bold hover:underline">Copy</button>
+                    </div>
+                </div>
+                <textarea id="edit-note" rows="5" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500 text-sm dark:text-white"></textarea>
+            </div>
+        </form>
+
+        <div class="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 flex gap-4">
+            <button id="save-btn" class="flex-1 py-4 bg-blue-500 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-600 transition-all">Save</button>
+            <button onclick="window.closeDrawer()" class="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl hover:bg-slate-200 transition-all">Cancel</button>
+        </div>
+    </aside>
+
+    <script type="module">
+        import { API } from '../assets/js/api.js?v=2.3';
+
+        const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+        const bloodColors = {
+            'A': 'rose', 'B': 'blue', 'AB': 'purple', 'O': 'emerald'
+        };
+
+        function getColor(type) {
+            const base = type.replace(/[+-]/, '');
+            return bloodColors[base] || 'slate';
+        }
+
+        function loadAll() {
+            const grid = document.getElementById('knowledge-grid');
+            grid.innerHTML = bloodTypes.map(type => {
+                const color = getColor(type);
+                return `
+                    <div class="glass-card p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all group cursor-pointer" onclick="window.openEdit('${type}')">
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="w-14 h-14 bg-${color}-100 dark:bg-${color}-900/30 text-${color}-700 dark:text-${color}-300 flex items-center justify-center rounded-2xl font-black text-xl">${type}</span>
+                            <svg class="w-5 h-5 text-slate-400 opacity-0 group-hover:opacity-100 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Blood Group</span>
+                                <p class="text-slate-700 dark:text-slate-300 font-bold">${type} Blood Type</p>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Genetics</span>
+                                <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2">Inherited via ABO co-dominance patterns with Rh factor.</p>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        window.openEdit = (type) => {
+            document.getElementById('drawer-title').innerText = `Edit ${type} Information`;
+            document.getElementById('info-drawer').classList.remove('closed');
+        };
+
+        window.closeDrawer = () => {
+            document.getElementById('info-drawer').classList.add('closed');
+        };
+
+        document.getElementById('ai-gen-note').onclick = async () => {
+            const btn = document.getElementById('ai-gen-note');
+            const type = document.getElementById('drawer-title').innerText.split(' ')[1];
+            btn.innerText = 'Generating...';
+            try {
+                const res = await API.ai.generate('cleanup', { samples: [{ blood_group: type }] });
+                document.getElementById('edit-note').value = res.result || res.response || '';
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btn.innerText = 'AI Rewrite';
+            }
+        };
+
+        document.getElementById('copy-note-btn').onclick = () => {
+            const text = document.getElementById('edit-note').value;
+            navigator.clipboard.writeText(text);
+            const btn = document.getElementById('copy-note-btn');
+            btn.innerText = 'Copied!';
+            setTimeout(() => btn.innerText = 'Copy', 2000);
+        };
+
+        loadAll();
+    </script>
+</body>
+</html>

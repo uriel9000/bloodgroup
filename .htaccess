@@ -1,0 +1,25 @@
+# Prevent Directory Listing (Force Browsing Protection)
+Options -Indexes
+
+<IfModule mod_headers.c>
+    # Mitigate Cross-Site Scripting (XSS) and stop page loading if an attack is detected
+    Header set X-XSS-Protection "1; mode=block"
+
+    # Block MIME type sniffing strictly
+    Header set X-Content-Type-Options "nosniff"
+
+    # Block Clickjacking by disallowing embedding on external domains
+    Header set X-Frame-Options "SAMEORIGIN"
+
+    # Restrict unauthenticated origins fetching internal data / generic CSP
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;"
+</IfModule>
+
+# Block sensitive internal codebase assets (.md logs, schemas, powershell scripts)
+<FilesMatch "\.(md|sql|ps1|ini|env|log)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# The manifest requires an exception if you block `.json` broadly, but I haven't blocked `.json` here to prevent breaking frontend fetching logic (since JSON arrays populate the UI stats).

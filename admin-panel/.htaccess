@@ -1,0 +1,9 @@
+# Enforce structural integrity over admin routes
+Options -Indexes
+
+<IfModule mod_headers.c>
+    # Lock down the admin interfaces from being framed by external sites
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

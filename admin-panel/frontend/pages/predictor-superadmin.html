@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Health Explorer | Admin Panel V4</title>
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/chart.min.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex" data-role="superadmin">
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <main class="ml-0 lg:ml-[280px] flex-1 p-8 lg:p-10 min-h-screen transition-all">
+        <div id="page-title-data" class="hidden">Algorithm Health Explorer</div>
+
+        <div class="dashboard-wrapper bento-layout">
+            <header class="bento-header flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-800 dark:text-white">Predictor Ecosystem Health</h1>
+                    <p class="text-slate-500 mt-1">Superadmin Diagnostics & Model Performance</p>
+                </div>
+            </header>
+
+            <div class="grid-container superadmin-grid">
+                
+                <!-- Primary KPI: Algorithm Confidence -->
+                <div class="glass-card card p-6 text-center flex flex-col justify-center items-center">
+                    <h2 class="card-title text-sm uppercase tracking-widest text-slate-400">Algorithm Confidence</h2>
+                    <!-- Chart.js Gauge Simulation (Doughnut) -->
+                    <div class="relative w-full h-32 flex items-center justify-center">
+                         <canvas id="confidenceGauge"></canvas>
+                         <div class="absolute inset-0 flex items-center justify-center mt-4 flex-col">
+                             <span class="text-3xl font-black text-blue-500" id="conf-val">97.4%</span>
+                         </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4" id="conf-status">Model performing optimally</p>
+                </div>
+
+                <!-- Primary KPI: System Uptime -->
+                <div class="glass-card card p-6 text-center flex flex-col justify-center items-center">
+                    <h2 class="card-title text-sm uppercase tracking-widest text-slate-400">System Uptime</h2>
+                    <div class="text-4xl font-black text-slate-700 dark:text-slate-200 mt-2">99.9%</div>
+                    <p class="text-xs text-slate-500 mt-2" id="uptime-stats">Uptime Last 30 Days</p>
+                    <div class="mt-4 flex gap-1 items-center bg-blue-50 dark:bg-blue-900/20 px-3 py-1 rounded-lg">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                        <span class="text-xs font-bold text-blue-600">Servers Healthy</span>
+                    </div>
+                </div>
+
+                <!-- Security & Alerts Panel -->
+                <div class="glass-card card p-6 card.span-2 flex flex-col lg:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="card-title m-0">Critical Warnings & Alerts</h2>
+                        <span class="px-2 py-1 bg-rose-100 text-rose-700 text-xs font-bold rounded">Strict Alerts</span>
+                    </div>
+                    
+                    <ul class="space-y-3 flex-1 overflow-y-auto" id="critical-alerts">
+                        <li class="p-3 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-900 rounded-xl flex items-center gap-3">
+                            <span class="w-3 h-3 bg-rose-500 rounded-full flex-shrink-0 animate-pulse"></span>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-rose-700 dark:text-rose-400">AI Model Latency High in Region EMEA</p>
+                                <p class="text-xs text-rose-500">Response > 1500ms detected.</p>
+                            </div>
+                        </li>
+                        <li class="p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center gap-3">
+                            <span class="w-3 h-3 bg-amber-500 rounded-full flex-shrink-0"></span>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-slate-700 dark:text-slate-300">Database synchronization delay</p>
+                                <p class="text-xs text-slate-500">Lag is 4s against replica.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Prediction Flow Monitoring -->
+                <div class="glass-card card p-6 lg:col-span-4">
+                    <h2 class="card-title">Prediction Execution Flow (Requests / Hr)</h2>
+                    <div class="h-64 w-full">
+                        <canvas id="flowChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- System Audit Log (Table) -->
+                <div class="glass-card card p-0 overflow-hidden lg:col-span-4">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <h2 class="card-title m-0">System Audit Log</h2>
+                        <p class="text-xs text-slate-500">Immutable ledger of platform configurations.</p>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 dark:bg-slate-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-xs font-black text-slate-500 uppercase tracking-wider">Timestamp</th>
+                                    <th class="px-6 py-3 text-xs font-black text-slate-500 uppercase tracking-wider">Admin action</th>
+                                    <th class="px-6 py-3 text-xs font-black text-slate-500 uppercase tracking-wider">Entity altered</th>
+                                    <th class="px-6 py-3 text-xs font-black text-slate-500 uppercase tracking-wider">IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="audit-table-body">
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                    <td class="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">2026-04-03 14:02:11</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-slate-700 dark:text-slate-300">Confidence Threshold adjustment</td>
+                                    <td class="px-6 py-4 text-sm text-blue-500">Predictor Config (89% -> 90%)</td>
+                                    <td class="px-6 py-4 text-xs font-mono text-slate-500">192.168.1.100</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                    <td class="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">2026-04-03 12:15:02</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-slate-700 dark:text-slate-300">Machine Learning Key Rotation</td>
+                                    <td class="px-6 py-4 text-sm text-blue-500">Environment Vars</td>
+                                    <td class="px-6 py-4 text-xs font-mono text-slate-500">10.0.4.52</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                    <td class="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">2026-04-02 09:44:18</td>
+                                    <td class="px-6 py-4 text-sm font-bold text-slate-700 dark:text-slate-300">Purged cached prediction queues</td>
+                                    <td class="px-6 py-4 text-sm text-blue-500">Redis Cache</td>
+                                    <td class="px-6 py-4 text-xs font-mono text-slate-500">45.22.19.8</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Gauge Chart
+            const gaugeCtx = document.getElementById('confidenceGauge').getContext('2d');
+            const gaugeColor = '#3b82f6'; // blue-500
+            new Chart(gaugeCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [97.4, 2.6], // value vs remainder
+                        backgroundColor: [gaugeColor, 'rgba(16, 185, 129, 0.1)'],
+                        borderWidth: 0,
+                        circumference: 180,
+                        rotation: 270,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: { tooltip: { enabled: false } },
+                    animation: { animateScale: true }
+                }
+            });
+
+            // 2. Line Chart (Flow)
+            const flowCtx = document.getElementById('flowChart').getContext('2d');
+            new Chart(flowCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Now'],
+                    datasets: [{
+                        label: 'Requests processed',
+                        data: [120, 80, 450, 810, 620, 390, 410],
+                        borderColor: '#2c3e50',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(44,62,80,0.05)'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

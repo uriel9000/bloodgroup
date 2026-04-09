@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Analytics | Admin Panel V4</title>
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/chart.min.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex" data-role="admin">
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <main class="flex-1 p-8 lg:p-10 min-h-screen transition-all">
+        <div id="page-title-data" class="hidden">Prediction Analytics</div>
+
+        <div class="dashboard-wrapper bento-layout">
+            <header class="bento-header flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-800 dark:text-white">Operational Analytics</h1>
+                    <p class="text-slate-500 mt-1">Observations & Model Validation Insights</p>
+                </div>
+            </header>
+
+            <div class="grid-container admin-grid">
+                
+                <!-- Distribution Analysis -->
+                <div class="glass-card card p-6">
+                    <h2 class="card-title text-center text-slate-700 dark:text-slate-200">Blood Group Distribution</h2>
+                    <div class="relative w-full h-64">
+                        <canvas id="bloodGroupDistribution"></canvas>
+                    </div>
+                </div>
+
+                <!-- Prediction Volume Trend -->
+                <div class="glass-card card p-6 card.span-2 lg:col-span-2">
+                    <h2 class="card-title text-slate-700 dark:text-slate-200">Prediction Volume (Last 30 Days)</h2>
+                    <div class="w-full h-64">
+                        <canvas id="volumeTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Data Validation Component -->
+                <div class="glass-card card p-0 lg:col-span-3 card.span-full overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <h2 class="card-title m-0">Recent Predictions & Validations</h2>
+                            <p class="text-xs text-slate-500 block">Cross-reference predictor results against Lab confirmations.</p>
+                        </div>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                             <input type="search" placeholder="Search Unique ID..." class="w-full md:w-48 px-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white" />
+                             <select class="px-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 outline-none cursor-pointer">
+                                 <option value="">Filter by Confidence</option>
+                                 <option value="high">High (>95%)</option>
+                                 <option value="med">Medium (90-95%)</option>
+                                 <option value="low">Low (<90%)</option>
+                             </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left whitespace-nowrap">
+                            <thead class="bg-slate-50 dark:bg-slate-800 text-xs font-black text-slate-500 uppercase tracking-wider">
+                                <tr>
+                                    <th onclick="sortPred('id')" class="px-6 py-4 cursor-pointer hover:text-blue-500 select-none">Unique ID ↕</th>
+                                    <th onclick="sortPred('geno')" class="px-6 py-4 cursor-pointer hover:text-blue-500 select-none">Input Genotype ↕</th>
+                                    <th onclick="sortPred('type')" class="px-6 py-4 cursor-pointer hover:text-blue-500 select-none">Predicted Type ↕</th>
+                                    <th onclick="sortPred('conf')" class="px-6 py-4 cursor-pointer hover:text-blue-500 select-none">Confidence ↕</th>
+                                    <th onclick="sortPred('state')" class="px-6 py-4 text-center cursor-pointer hover:text-blue-500 select-none">Validation State ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="predictions-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-wrap justify-between items-center gap-4">
+                        <span class="text-xs font-bold text-slate-500" id="predict-pagination-info">Showing...</span>
+                         <div class="flex gap-2">
+                             <button onclick="changePredictPage(-1)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all">Prev</button>
+                             <button onclick="changePredictPage(1)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all">Next</button>
+                         </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // JS Pagination Engine
+            const PREDICTIONS = [
+                { id: '#PRED-9982', geno: 'P1: AO, P2: BO', type: 'A+', conf: 0.981, state: 'confirmed' },
+                { id: '#PRED-9983', geno: 'P1: OO, P2: AB', type: 'A-', conf: 0.884, state: 'pending' },
+                { id: '#PRED-9984', geno: 'P1: BB, P2: OO', type: 'B+', conf: 0.950, state: 'discrepancy' },
+                { id: '#PRED-9985', geno: 'P1: AA, P2: BB', type: 'AB+', conf: 0.999, state: 'confirmed' },
+                { id: '#PRED-9986', geno: 'P1: OO, P2: OO', type: 'O-', conf: 0.920, state: 'confirmed' },
+                { id: '#PRED-9987', geno: 'P1: AO, P2: AO', type: 'A+', conf: 0.750, state: 'pending' },
+                { id: '#PRED-9988', geno: 'P1: AB, P2: O', type: 'A-', conf: 0.972, state: 'confirmed' },
+            ];
+
+            let predictPage = 1;
+            const predictPerPage = 3;
+            let predictSortCol = 'id';
+            let predictSortDir = -1;
+
+            window.sortPred = (col) => {
+                if(predictSortCol === col) predictSortDir *= -1;
+                else { predictSortCol = col; predictSortDir = 1; }
+                renderPred();
+            };
+
+            window.changePredictPage = (dir) => {
+                predictPage += dir;
+                renderPred();
+            };
+
+            function renderPred() {
+                const tbody = document.getElementById('predictions-tbody');
+                let data = [...PREDICTIONS];
+                
+                data.sort((a,b) => {
+                    let vA = a[predictSortCol];
+                    let vB = b[predictSortCol];
+                    if(typeof vA==='string') vA=vA.toLowerCase();
+                    if(typeof vB==='string') vB=vB.toLowerCase();
+                    if(vA<vB) return -1*predictSortDir;
+                    if(vA>vB) return 1*predictSortDir;
+                    return 0;
+                });
+
+                const total = data.length;
+                const totalPages = Math.ceil(total/predictPerPage) || 1;
+                if(predictPage < 1) predictPage = 1;
+                if(predictPage > totalPages) predictPage = totalPages;
+                
+                const startIdx = (predictPage-1)*predictPerPage;
+                const paginated = data.slice(startIdx, startIdx+predictPerPage);
+
+                document.getElementById('predict-pagination-info').innerText = `Showing ${total===0?0:startIdx+1} to ${Math.min(startIdx+predictPerPage,total)} of ${total} entries`;
+
+                tbody.innerHTML = paginated.map(p => {
+                    const isDis = p.state === 'discrepancy';
+                    const isConf = p.state === 'confirmed';
+                    
+                    let stateBadge = '';
+                    if(isConf) stateBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold rounded-full"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Confirmed Match</span>`;
+                    else if(isDis) stateBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-bold rounded-full"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> Match Discrepancy</span>`;
+                    else stateBadge = `<span class="inline-flex items-center gap-1.5 px-3 py-1 border-2 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-xs font-bold rounded-full"><span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-pulse"></span> Pending Lab</span>`;
+
+                    let confCls = 'text-slate-400';
+                    if(p.conf > 0.95) confCls = 'text-blue-600';
+                    else if(p.conf < 0.90) confCls = 'text-amber-500 flex items-center gap-1.5 text-sm';
+                    
+                    let confStr = (p.conf*100).toFixed(1) + '%';
+                    if(p.conf < 0.90) confStr = `<span class="pulse-ring bg-amber"></span> <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> ` + confStr;
+
+                    return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <td class="px-6 py-4 text-sm font-mono text-slate-700 dark:text-slate-300">${p.id}</td>
+                        <td class="px-6 py-4 text-sm font-mono text-slate-500">${p.geno}</td>
+                        <td class="px-6 py-4 text-sm font-black ${isConf?'text-blue-600':'text-slate-600 dark:text-slate-300'}">${p.type}</td>
+                        <td class="px-6 py-4 font-bold ${confCls} text-sm">${confStr}</td>
+                        <td class="px-6 py-4 text-center">${stateBadge}</td>
+                    </tr>`;
+                }).join('');
+            }
+            renderPred();
+
+            // 1. Blood Distribution Chart
+            const distCtx = document.getElementById('bloodGroupDistribution').getContext('2d');
+            new Chart(distCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'],
+                    datasets: [{
+                        data: [145, 23, 110, 15, 85, 12, 45, 8],
+                        backgroundColor: [
+                            '#007bff', '#0ea5e9', '#0369a1', '#38bdf8', 
+                            '#7dd3fc', '#bae6fd', '#e2e8f0', '#94a3b8'
+                        ],
+                        borderWidth: 1,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: { position: 'right', labels: { usePointStyle: true, font: {family: 'monospace', size: 11} } }
+                    }
+                }
+            });
+
+            // 2. Prediction Volume Trend
+            const trendCtx = document.getElementById('volumeTrendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['W1', 'W2', 'W3', 'W4'],
+                    datasets: [
+                        {
+                            label: 'Region NA',
+                            data: [350, 410, 390, 480],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Region EMEA',
+                            data: [210, 250, 240, 290],
+                            backgroundColor: '#0ea5e9',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: {display: false} },
+                        y: { stacked: true, beginAtZero: true, grid: {color: 'rgba(0,0,0,0.05)'} }
+                    },
+                    plugins: { legend: { position: 'top', labels: {usePointStyle: true} } }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

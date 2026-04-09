@@ -1,0 +1,20 @@
+.agents/
+.git/
+.gitignore
+.env*
+admin-panel/.env*
+admin-panel/backend/.env*
+.htaccess
+*.md
+*.sql
+*.ps1
+
+# Backend and local utilities are deployed separately from the static Vercel app
+api/
+admin-panel/backend/
+admin-panel/frontend/assets/js/billing.js
+check_settings.php
+clear_cache.php
+setup_db.php
+test_*.php
+tmp_*.php

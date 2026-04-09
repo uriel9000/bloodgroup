@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing & Subscriptions | Admin Panel V3</title>
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <!-- Sidebar Placeholder -->
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col p-8 transition-all gap-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    Billing & Subscriptions
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400">Manage plans, usage limits, and invoices from one deployment-safe dashboard.</p>
+            </div>
+        </div>
+
+        <div id="status-banner" class="hidden rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <section class="glass-card p-6 lg:col-span-1 border-t-4 border-blue-500 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-6 opacity-10">
+                    <svg class="w-32 h-32 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"></path></svg>
+                </div>
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-2 relative z-10">Current Plan</h2>
+                <p id="current-plan-name" class="text-4xl font-extrabold text-blue-600 mb-1 relative z-10">Loading...</p>
+                <p id="plan-meta" class="text-sm text-slate-500 dark:text-slate-400 font-bold mb-6 relative z-10">Fetching plan details</p>
+                <div class="flex items-center gap-2 mb-6 text-sm text-slate-700 dark:text-slate-300 relative z-10">
+                    <span id="billing-status-badge" class="status-badge status-inactive">inactive</span>
+                </div>
+                <div class="flex flex-wrap gap-3 relative z-10">
+                    <button id="manage-billing-btn" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">Manage Billing</button>
+                    <button id="cancel-sub-btn" class="hidden bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold hover:bg-slate-200 transition-all">Cancel Plan</button>
+                </div>
+            </section>
+
+            <section class="glass-card p-6 lg:col-span-2">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-6">Current Cycle Usage</h2>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Genetic Predictions Engine</span>
+                            <span id="calc-count" class="text-xs font-bold text-slate-500">0 / 0</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+                            <div id="calc-bar" class="usage-bar bg-blue-500 h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p id="calc-hint" class="mt-2 text-xs text-slate-500">0% used this month</p>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">AI Requests</span>
+                            <span id="ai-count" class="text-xs font-bold text-slate-500">0 / 0</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+                            <div id="ai-bar" class="usage-bar bg-violet-500 h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p id="ai-hint" class="mt-2 text-xs text-slate-500">0% used this month</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="glass-card p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white">Available Plans</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Choose the plan that matches your expected calculation and AI volume.</p>
+                </div>
+            </div>
+            <div id="plans-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <p class="text-slate-400 col-span-1 lg:col-span-3 text-center py-8">Loading plans...</p>
+            </div>
+        </section>
+
+        <section class="glass-card rounded-[2rem] shadow-sm overflow-hidden flex-1 flex flex-col">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white">Invoice History</h2>
+                    <p id="invoice-total-badge" class="text-sm text-slate-500 dark:text-slate-400">Loading invoices...</p>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left whitespace-nowrap">
+                    <thead class="bg-slate-50/50 dark:bg-slate-800/50">
+                        <tr>
+                            <th class="px-6 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Date</th>
+                            <th class="px-6 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Invoice Number</th>
+                            <th class="px-6 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Amount</th>
+                            <th class="px-6 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Status</th>
+                            <th class="px-6 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoices-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-400">Loading invoices...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="invoice-pagination" class="hidden px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
+                <button id="prev-page" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+                <span id="page-info" class="text-sm text-slate-500 dark:text-slate-400">Page 1 of 1</span>
+                <button id="next-page" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="../assets/js/billing.runtime.js"></script>
+</body>
+</html>

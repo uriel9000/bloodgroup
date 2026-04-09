@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports Hub | Admin Panel V3</title>
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <!-- Sidebar Placeholder -->
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col p-8 transition-all">
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Reports Hub
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400">Generate, schedule, and download automated system reports</p>
+            </div>
+            <button class="bg-indigo-500 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-600 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                New Scheduled Report
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Full Data Export -->
+            <div class="glass-card p-6 flex flex-col group hover:border-indigo-500 transition-all cursor-pointer">
+                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-500 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Prediction Logs Archive</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 flex-1">Complete historical export of all system calculations inside a CSV file format.</p>
+                <button onclick="window.location.href=window.DeploymentRoutes.exportLogsUrl()" class="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-white rounded-xl font-bold group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm">Download CSV</button>
+            </div>
+
+            <!-- Executive Summary -->
+            <div class="glass-card p-6 flex flex-col group hover:border-blue-500 transition-all cursor-pointer">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 text-blue-500 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">Executive Summary</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 flex-1">A high-level PDF overview showing platform growth, trends, and security events over 30 days.</p>
+                <div class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400 rounded text-xs font-bold uppercase tracking-widest text-center">Beta Feature</div>
+            </div>
+
+            <!-- Billing History -->
+            <div class="glass-card p-6 flex flex-col group hover:border-blue-500 transition-all cursor-pointer">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 text-blue-500 rounded-xl flex items-center justify-center mb-6 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">Financial Ledger</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 flex-1">Consolidated invoicing and tenant usage billing report. Requires super admin privileges.</p>
+                <button class="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-xl font-bold cursor-not-allowed">Scheduled Monthly</button>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

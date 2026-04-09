@@ -1,0 +1,32 @@
+.agents/
+.tools/
+.vercel/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+admin-panel/.env
+admin-panel/.env.*
+!admin-panel/.env.example
+admin-panel/backend/.env
+admin-panel/backend/.env.*
+!admin-panel/backend/.env.example
+
+# Logs and local artifacts
+*.log
+Thumbs.db
+.DS_Store
+
+# Local-only scripts and planning notes
+check_settings.php
+clear_cache.php
+setup_db.php
+test_*.php
+tmp_*.php
+replace_colors.ps1
+sync_theme.ps1
+task.md
+implementation_plan.md
+dashboard_design_spec.md
+walkthrough.md

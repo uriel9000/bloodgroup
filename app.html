@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blood Group Predictor | Educational Genetics Tool</title>
+    <meta
+      name="description"
+      content="Predict child blood group probabilities using Punnett square genetics."
+    />
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#27ae60" />
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css?v=10" />
+    <script src="js/runtime-config.js"></script>
+    <script src="js/landing.js?v=2" defer></script>
+
+    <!-- Chart.js -->
+    <script src="admin-panel/frontend/assets/js/chart.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <a href="index.html" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; background: var(--card-bg);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Back to Home
+          </a>
+          <button id="themeToggle" style="background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.5rem; cursor: pointer; color: var(--text-primary); transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;" aria-label="Toggle Dark Mode">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
+        </div>
+        <h1>Blood Group Predictor</h1>
+        <p>Calculate child blood group probabilities using genetics</p>
+      </header>
+
+      <main>
+        <!-- Input Card -->
+        <section class="glass-card">
+          <div class="input-grid">
+            <div class="input-field">
+              <label for="parent1">Parent 1 Blood Group</label>
+              <select id="parent1">
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+            <div class="input-field">
+              <label for="parent2">Parent 2 Blood Group</label>
+              <select id="parent2">
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+          </div>
+          <button id="calculateBtn" class="btn-primary">Predict Results</button>
+        </section>
+
+        <!-- Results Section (Hidden by default) -->
+        <section id="resultSection" style="display: none">
+          <div class="results-container">
+            <div class="result-list" id="resultList">
+              <!-- Result items will be injected here -->
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="probabilityChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Genetic Analysis Section (Hidden by default) -->
+        <section id="analysisSection" style="display: none" class="analysis-section">
+          <div class="divider">
+            <span>Genetic Analysis</span>
+          </div>
+          
+          <div class="analysis-grid">
+            <!-- Rh Risk Indicator -->
+            <div id="rhRiskCard" class="card-glass risk-card">
+              <div class="risk-header">
+                <h3>Rh Compatibility Risk</h3>
+                <span id="riskBadge" class="badge">Safe</span>
+              </div>
+              <p id="riskMessage">No risks detected for this combination.</p>
+            </div>
+
+            <!-- AI Insights Panel -->
+            <div id="aiInsightsCard" class="card-glass ai-card">
+              <div class="card-header">
+                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <h3>AI Educational Insights</h3>
+              </div>
+              <div id="aiInsightsContent" class="ai-content">
+                Waiting for AI analysis...
+              </div>
+              <div class="clinical-disclaimer">
+                <p>This is educational and not a medical diagnosis.</p>
+              </div>
+            </div>
+
+            <!-- Genotype Probabilities Chart -->
+            <div class="card-glass genotype-card">
+              <h3>Genotype Probability Breakdown</h3>
+              <div class="genotype-list" id="genotypeList">
+                <!-- Genotypes will be injected here -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="history-section">
+          <h2 style="margin-bottom: 1.5rem; font-weight: 600">
+            Recent Calculations
+          </h2>
+          <div id="historyGrid" class="history-grid">
+            <!-- History cards will be injected here -->
+          </div>
+        </section>
+      </main>
+
+      <footer class="disclaimer">
+        <p>
+          <strong>Disclaimer:</strong> This tool provides probability estimates
+          based on genetic inheritance and is not a medical diagnostic tool.
+        </p>
+        <p style="margin-top: 1rem; color: var(--primary-color); font-weight: 500;">developed by uriel with you in mind @uriel tech 2026</p>
+      </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/genetics.js?v=9"></script>
+    <script src="js/db.js?v=9"></script>
+    <script src="js/app.js?v=9"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        // Purge old versions
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          for(let reg of regs) reg.unregister();
+        });
+        
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("sw.js?v=11")
+            .then((reg) => {
+              console.log("SW Registered");
+              // Force update checking
+              reg.update();
+            })
+            .catch((err) => console.log("SW registration failed", err));
+        });
+      }
+    </script>
+  </body>
+</html>

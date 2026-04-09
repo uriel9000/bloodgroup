@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | BloodGroup Admin Panel</title>
+    <meta name="description" content="Donor trends, fulfillment rates, and regional blood distribution analytics.">
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/chart.min.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col transition-all">
+
+        <div class="px-8 pt-8 pb-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 dark:text-white">Blood Bank Analytics</h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Donor trends, fulfillment rates &amp; regional distribution</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="date" id="date-from" class="text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-rose-400 text-slate-700 dark:text-slate-300">
+                    <span class="text-slate-400 text-sm">–</span>
+                    <input type="date" id="date-to"   class="text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-rose-400 text-slate-700 dark:text-slate-300">
+                    <button onclick="refreshCharts()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-rose-200/40">Apply</button>
+                    <button onclick="exportReport()" class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-8 pb-8 flex flex-col gap-6">
+
+            <!-- KPI Summary Row -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-2xl">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Donors</div>
+                    <div class="text-2xl font-black text-rose-600">2,847</div>
+                    <div class="text-xs text-blue-500 font-bold mt-1">↑ 8.3% this month</div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Requests (Month)</div>
+                    <div class="text-2xl font-black text-amber-600">142</div>
+                    <div class="text-xs text-rose-500 font-bold mt-1">↑ 12% vs last month</div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Fulfillment Rate</div>
+                    <div class="text-2xl font-black text-blue-600">87.3%</div>
+                    <div class="text-xs text-blue-500 font-bold mt-1">↑ 2.1% improvement</div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Most Needed</div>
+                    <div class="text-2xl font-black text-rose-600">O-</div>
+                    <div class="text-xs text-slate-500 font-bold mt-1">Universal donor type</div>
+                </div>
+            </div>
+
+            <!-- Donor Trends & Blood Type Requests Side-by-Side -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Donor Trends Line -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <h3 class="font-black text-slate-800 dark:text-white">Donor Registrations</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Monthly new donors — 12 month view</p>
+                        </div>
+                    </div>
+                    <div class="h-64 w-full"><canvas id="donorTrendChart"></canvas></div>
+                </div>
+
+                <!-- Request Volume Line -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <h3 class="font-black text-slate-800 dark:text-white">Request Volume</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Blood requests over time</p>
+                        </div>
+                    </div>
+                    <div class="h-64 w-full"><canvas id="requestVolumeChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Fulfillment Rate Grouped Bar -->
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h3 class="font-black text-slate-800 dark:text-white">Fulfillment Rate by Blood Type</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Fulfilled vs. unfulfilled requests per type</p>
+                    </div>
+                </div>
+                <div class="h-56 w-full"><canvas id="fulfillmentBarChart"></canvas></div>
+            </div>
+
+            <!-- Regional Distribution -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <!-- Horizontal Bar — Regional -->
+                <div class="glass-card p-6 lg:col-span-3">
+                    <h3 class="font-black text-slate-800 dark:text-white mb-1">Regional Demand Distribution</h3>
+                    <p class="text-xs text-slate-500 mb-5">Total requests by region/district</p>
+                    <div class="h-64 w-full"><canvas id="regionalChart"></canvas></div>
+                </div>
+
+                <!-- Distribution Pie -->
+                <div class="glass-card p-6 lg:col-span-2">
+                    <h3 class="font-black text-slate-800 dark:text-white mb-1">Blood Type Distribution</h3>
+                    <p class="text-xs text-slate-500 mb-5">% of total requests per type</p>
+                    <div class="h-64 w-full flex items-center justify-center"><canvas id="typePieChart"></canvas></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const BTYPES = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+
+        function initCharts() {
+            // Donor Trend
+            new Chart(document.getElementById('donorTrendChart').getContext('2d'), {
+                type:'line',
+                data:{
+                    labels: MONTHS,
+                    datasets:[{
+                        label:'Donors',
+                        data:[210,245,190,280,310,298,340,302,380,360,410,390],
+                        borderColor:'#e11d48', borderWidth:3,
+                        pointRadius:4, pointBackgroundColor:'#e11d48',
+                        backgroundColor:'rgba(225,29,72,0.08)', fill:true, tension:0.4
+                    }]
+                },
+                options:{ responsive:true, maintainAspectRatio:false,
+                    scales:{ y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}, x:{grid:{display:false},ticks:{font:{size:10}}} },
+                    plugins:{ legend:{display:false} }
+                }
+            });
+
+            // Request Volume
+            new Chart(document.getElementById('requestVolumeChart').getContext('2d'), {
+                type:'line',
+                data:{
+                    labels: MONTHS,
+                    datasets:[{
+                        label:'Requests',
+                        data:[88,105,79,118,130,122,145,134,158,150,170,163],
+                        borderColor:'#f59e0b', borderWidth:3,
+                        pointRadius:4, pointBackgroundColor:'#f59e0b',
+                        backgroundColor:'rgba(245,158,11,0.08)', fill:true, tension:0.4
+                    }]
+                },
+                options:{ responsive:true, maintainAspectRatio:false,
+                    scales:{ y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}, x:{grid:{display:false},ticks:{font:{size:10}}} },
+                    plugins:{ legend:{display:false} }
+                }
+            });
+
+            // Fulfillment Bar
+            new Chart(document.getElementById('fulfillmentBarChart').getContext('2d'), {
+                type:'bar',
+                data:{
+                    labels: BTYPES,
+                    datasets:[
+                        { label:'Fulfilled',   data:[38,12,29,8,18,2,54,4],  backgroundColor:'rgba(16,185,129,0.85)', borderRadius:5 },
+                        { label:'Unfulfilled', data:[5,4,3,2,1,3,2,8],        backgroundColor:'rgba(225,29,72,0.65)', borderRadius:5 }
+                    ]
+                },
+                options:{ responsive:true, maintainAspectRatio:false,
+                    scales:{ y:{beginAtZero:true, grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}, x:{grid:{display:false},ticks:{font:{size:10}}} },
+                    plugins:{ legend:{position:'top', labels:{usePointStyle:true,padding:14,font:{size:11}}} }
+                }
+            });
+
+            // Regional
+            new Chart(document.getElementById('regionalChart').getContext('2d'), {
+                type:'bar',
+                data:{
+                    labels:['Lusaka','Copperbelt','Southern','Eastern','Ndola','Livingstone','Northwestern','Western'],
+                    datasets:[{
+                        label:'Requests',
+                        data:[310,245,180,142,120,98,75,55],
+                        backgroundColor:'rgba(225,29,72,0.75)',
+                        borderRadius:5
+                    }]
+                },
+                options:{
+                    indexAxis:'y',
+                    responsive:true, maintainAspectRatio:false,
+                    scales:{ x:{beginAtZero:true, grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}}, y:{grid:{display:false},ticks:{font:{size:10}}} },
+                    plugins:{ legend:{display:false} }
+                }
+            });
+
+            // Type Pie
+            new Chart(document.getElementById('typePieChart').getContext('2d'), {
+                type:'doughnut',
+                data:{
+                    labels: BTYPES,
+                    datasets:[{
+                        data:[32,8,24,5,12,2,40,12],
+                        backgroundColor:['#e11d48','#f43f5e','#3b82f6','#60a5fa','#8b5cf6','#a78bfa','#3b82f6','#34d399'],
+                        borderWidth:0
+                    }]
+                },
+                options:{
+                    responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{position:'bottom', labels:{usePointStyle:true,padding:10,font:{size:10}}} },
+                    cutout:'60%'
+                }
+            });
+        }
+
+        window.refreshCharts = () => { /* re-init with date filter in production */ };
+        window.exportReport = () => {
+            const csv = 'Month,Donors,Requests\n' +
+                ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+                .map((m,i) => `${m},${[210,245,190,280,310,298,340,302,380,360,410,390][i]},${[88,105,79,118,130,122,145,134,158,150,170,163][i]}`).join('\n');
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            a.download = 'bloodgroup-analytics.csv';
+            a.click();
+        };
+
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+</body>
+</html>

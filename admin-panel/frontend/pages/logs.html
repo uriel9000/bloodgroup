@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logs | BloodGroup Admin Panel</title>
+    <meta name="description" content="View system activity, audit trails, and calculation logs.">
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+    <style>
+        .log-type-tag { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 6px; }
+        .type-admin { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .type-stock { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .type-request { background: rgba(225, 29, 72, 0.1); color: #e11d48; border: 1px solid rgba(225, 29, 72, 0.2); }
+        .type-calc { background: rgba(16, 185, 129, 0.1); color: #3b82f6; border: 1px solid rgba(16, 185, 129, 0.2); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col transition-all">
+
+        <div class="px-8 pt-8 pb-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                        <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        System & Audit Logs
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Track every action and system event across the platform</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="exportLogs()" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-8 pb-8 flex flex-col gap-6">
+
+            <!-- Filter Bar -->
+            <div class="glass-card p-4 rounded-2xl flex flex-wrap items-center gap-4">
+                <div class="flex flex-col gap-1.5 min-w-[150px]">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Log Type</label>
+                    <select id="filter-type" class="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-3 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-rose-400">
+                        <option value="all">All Events</option>
+                        <option value="admin">Administrative</option>
+                        <option value="stock">Inventory</option>
+                        <option value="request">Blood Requests</option>
+                        <option value="calc">Calculation History</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1.5 min-w-[200px] flex-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Search Keywords</label>
+                    <input type="text" id="log-search" placeholder="Search by user, action or IP..." class="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-rose-400">
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Date</label>
+                    <input type="date" id="filter-date" class="bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-rose-400">
+                </div>
+                <div class="flex items-end self-end h-[42px]">
+                    <button onclick="resetFilters()" class="p-2.5 text-slate-400 hover:text-rose-500 transition-all" title="Reset Filters">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logs Table -->
+            <div class="glass-card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50/70 dark:bg-slate-800/50">
+                            <tr>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Timestamp</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">User / Actor</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Action / Details</th>
+                                <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-tbody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <!-- JS Filled -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/30 dark:bg-slate-900/10">
+                    <span class="text-xs font-bold text-slate-500" id="pagination-info">Showing 1-10 of 248 events</span>
+                    <div class="flex gap-2">
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-rose-500 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white font-bold text-xs ring-2 ring-rose-500/20">1</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-rose-500 transition-all font-bold text-xs">2</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-rose-500 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const LOG_DATA = [
+            { ts: '2026-04-02 22:45:12', type: 'admin',   user: 'Super Admin', action: 'User Invited: Fatima Banda (Admin)', ip: '192.168.1.1' },
+            { ts: '2026-04-02 22:40:05', type: 'stock',   user: 'Sarah Mwale', action: 'Stock Update: O- (+25 Units)', ip: '192.168.1.42' },
+            { ts: '2026-04-02 21:15:30', type: 'request', user: 'James Phiri',  action: 'Request Approved: AB- for City General', ip: '10.0.0.8' },
+            { ts: '2026-04-02 20:55:22', type: 'calc',    user: 'Guest',       action: 'Blood Group Calculation: A+ and O-', ip: '154.72.19.2' },
+            { ts: '2026-04-02 20:42:15', type: 'admin',   user: 'Super Admin', action: 'Security Setting Changed: Maintenance Mode Off', ip: '192.168.1.1' },
+            { ts: '2026-04-02 19:30:00', type: 'stock',   user: 'Sarah Mwale', action: 'Stock Update: A+ (-10 Units Exported)', ip: '192.168.1.42' },
+            { ts: '2026-04-02 18:22:45', type: 'calc',    user: 'Guest',       action: 'Blood Group Calculation: B- and B-', ip: '102.65.3.91' },
+            { ts: '2026-04-02 17:10:12', type: 'request', user: 'James Phiri',  action: 'Request Rejected: O+ Insufficient local stock', ip: '10.0.0.8' },
+            { ts: '2026-04-02 16:05:00', type: 'stock',   user: 'Sarah Mwale', action: 'Critical Notification: O- below 5 units', ip: 'System' },
+            { ts: '2026-04-02 15:45:30', type: 'calc',    user: 'Guest',       action: 'Blood Group Calculation: AB+ and O+', ip: '197.232.1.5' },
+        ];
+
+        function renderLogs(filterType = 'all', search = '') {
+            const tbody = document.getElementById('logs-tbody');
+            const filtered = LOG_DATA.filter(log => {
+                const typeMatch = filterType === 'all' || log.type === filterType;
+                const searchMatch = !search || 
+                    log.user.toLowerCase().includes(search.toLowerCase()) || 
+                    log.action.toLowerCase().includes(search.toLowerCase()) || 
+                    log.ip.toLowerCase().includes(search.toLowerCase());
+                return typeMatch && searchMatch;
+            });
+
+            tbody.innerHTML = filtered.map(log => `
+                <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-all text-sm">
+                    <td class="px-6 py-4 font-mono text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">${log.ts}</td>
+                    <td class="px-6 py-4">
+                        <span class="log-type-tag type-${log.type}">${log.type}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="font-bold text-slate-800 dark:text-slate-200">${log.user}</span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600 dark:text-slate-400 max-w-md truncate">
+                        ${log.action}
+                    </td>
+                    <td class="px-6 py-4 font-mono text-xs text-slate-400">
+                        ${log.ip}
+                    </td>
+                </tr>
+            `).join('');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-20 text-center text-slate-400 italic">No events found matching your filters.</td></tr>`;
+            }
+            
+            document.getElementById('pagination-info').innerText = `Showing 1-${filtered.length} of ${filtered.length} events`;
+        }
+
+        document.getElementById('filter-type').addEventListener('change', (e) => {
+            renderLogs(e.target.value, document.getElementById('log-search').value);
+        });
+
+        document.getElementById('log-search').addEventListener('input', (e) => {
+            renderLogs(document.getElementById('filter-type').value, e.target.value);
+        });
+
+        window.resetFilters = () => {
+            document.getElementById('filter-type').value = 'all';
+            document.getElementById('log-search').value = '';
+            document.getElementById('filter-date').value = '';
+            renderLogs();
+        };
+
+        window.exportLogs = () => {
+            const csv = 'Timestamp,Type,User,Action,IP\n' + 
+                LOG_DATA.map(l => `"${l.ts}","${l.type}","${l.user}","${l.action}","${l.ip}"`).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'bloodgroup_audit_logs.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        // Init
+        renderLogs();
+    </script>
+</body>
+</html>

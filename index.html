@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blood Group Predictor & Genetic Analysis</title>
+  <meta name="description" content="Predict your child's blood group and learn about genetic compatibility with our intelligent analysis tool." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#fafbfc" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+
+  <!-- Styles & Scripts -->
+  <link rel="stylesheet" href="css/landing.css?v=1" />
+  <script src="js/runtime-config.js"></script>
+  <script src="js/landing.js?v=1" defer></script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      BloodGroup AI
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#education">Education</a>
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle Dark Mode">
+        <!-- SVG injected via JS -->
+      </button>
+      <a href="app.html" class="btn btn-primary" style="padding: 0.5rem 1.25rem;">Try Predictor</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="badge animate-on-scroll">v2.0 PWA Ready</div>
+    <h1 class="animate-on-scroll">Understand Your Blood Compatibility Before Starting a Family</h1>
+    <p class="animate-on-scroll">Predict your child's blood group and learn about genetic compatibility with our intelligent analysis tool. Secure, fast, and scientifically aligned.</p>
+    <div class="hero-cta animate-on-scroll">
+      <a href="app.html" class="btn btn-primary">Start Prediction</a>
+      <a href="#education" class="btn btn-outline">Learn More</a>
+    </div>
+  </header>
+
+  <!-- Features Grid -->
+  <section id="features">
+    <h2 class="section-title animate-on-scroll">Intelligent Genetic Insights</h2>
+    <p class="section-subtitle animate-on-scroll">Discover how our platform simplifies complex genetics for everyday families and educators.</p>
+    
+    <div class="features-grid">
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+        </div>
+        <h3>Blood Group Prediction</h3>
+        <p>Instantly calculate the probability of your child's blood type using a robust Punnett square calculation engine.</p>
+      </div>
+      
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        </div>
+        <h3>Compatibility Insights</h3>
+        <p>Understand how parental blood groups interact and view detailed genotype breakdowns to ensure transparency.</p>
+      </div>
+      
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </div>
+        <h3>AI-Powered Explanation</h3>
+        <p>Get personalized, educational summaries explaining the science behind your specific prediction results.</p>
+      </div>
+
+      <div class="feature-card animate-on-scroll">
+        <div class="feature-icon text-medical-blue">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <h3>Rh Risk Awareness</h3>
+        <p>Automatically detect potential Rh incompatibility risks that might require medical consultation during pregnancy.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" style="background-color: rgba(0,0,0,0.02);">
+    <h2 class="section-title animate-on-scroll">How It Works</h2>
+    <p class="section-subtitle animate-on-scroll">Four simple steps to gain clarity on genetic inheritance.</p>
+    
+    <div class="steps-container">
+      <div class="step-item animate-on-scroll">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Enter Parent Data</h3>
+          <p>Select the biological blood types (ABO and Rh factor) for both parents.</p>
+        </div>
+      </div>
+      <div class="step-item animate-on-scroll">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>Algorithm Processes Context</h3>
+          <p>Our engine maps genotypes and calculates precise probabilistic matrices using a virtual Punnett square.</p>
+        </div>
+      </div>
+      <div class="step-item animate-on-scroll">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>Review Visual Results</h3>
+          <p>Instantly see the percentage breakdown of potential blood types your child may inherit.</p>
+        </div>
+      </div>
+      <div class="step-item animate-on-scroll">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h3>Read AI Insights & Risks</h3>
+          <p>Explore an educational breakdown of the result and check if any Rh incompatibility markers are flagged.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Section -->
+  <section class="trust-section">
+    <h2 class="section-title animate-on-scroll" style="font-size: 2rem;">Designed For Specific Needs</h2>
+    <div class="trust-grid">
+      <div class="trust-item animate-on-scroll">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <span>Couples Planning a Family</span>
+      </div>
+      <div class="trust-item animate-on-scroll">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        <span>Students Learning Genetics</span>
+      </div>
+      <div class="trust-item animate-on-scroll">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        <span>Health & Safety Awareness</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education Section -->
+  <section id="education">
+    <div class="education-section animate-on-scroll">
+      <div class="education-content">
+        <h2>Why Blood Group Awareness Matters</h2>
+        <p>Understanding genetics isn't just about prediction; it's about preparation. Beyond the fascinating science of whether a child inherits A, B, or O alleles, identifying the Rh factor is critical for a smooth pregnancy.</p>
+        
+        <div class="warning-box">
+          <h4>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            What is Rh Incompatibility?
+          </h4>
+          <p>If a mother is Rh-negative and the baby inherits an Rh-positive gene from the father, the mother's immune system might produce antibodies against the baby's blood. Early awareness ensures proper medical intervention, neutralizing risks.</p>
+        </div>
+      </div>
+      <div class="education-image">
+        <!-- SVG DNA/Health Concept -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section animate-on-scroll">
+    <h2>Ready to Predict?</h2>
+    <p>Launch the predictor tool now to generate accurate probabilities for your specific combination.</p>
+    <div>
+      <a href="app.html" class="btn btn-outline" style="margin-right: 1rem; border-width: 2px;">Launch Predictor</a>
+      <a href="admin-panel/frontend/pages/login.html" class="btn btn-outline" style="border: none; text-decoration: underline;">Admin Login</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="margin-bottom: 1rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          BloodGroup AI
+        </a>
+        <p>A smart, fast, and secure genetic analysis service helping families and educators understand the science behind blood types.</p>
+      </div>
+      
+      <div class="link-group">
+        <h4>Product</h4>
+        <a href="app.html">Predictor Engine</a>
+        <a href="#features">Features</a>
+        <a href="#education">Genetics Guide</a>
+      </div>
+
+      <div class="link-group">
+        <h4>Legal & Privacy</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Security</a>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p class="clinical-disclaimer-footer">
+        <strong>MEDICAL DISCLAIMER:</strong> This tool provides probability estimates based on standard Mendelian genetics and algorithmic approximations. It is designed for educational purposes only and DOES NOT replace professional medical advice, diagnosis, or lab testing. Please consult a healthcare provider for medical concerns.
+      </p>
+      <p style="margin-top: 1.5rem;">&copy; 2026 Uriel Tech. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Service Worker Registration for PWA -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js?v=11").catch(err => console.log("SW Reg failed", err));
+      });
+    }
+  </script>
+</body>
+</html>

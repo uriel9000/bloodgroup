@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Insights | Admin Panel V3</title>
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <!-- Sidebar Placeholder -->
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col p-8 transition-all">
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86 1.406l-1.12 1.12a2 2 0 01-1.28.57H9a2 2 0 01-2-2v-1.144a2 2 0 01.57-1.28l1.12-1.12a6 6 0 001.406-3.86l-.477-2.387a2 2 0 00-.547-1.022L7 2.914l-.307.307a2 2 0 01-1.28.57H5a2 2 0 01-2-2v-.144a2 2 0 01.57-1.28l1.12-1.12a6 6 0 001.406-3.86l-.477-2.387a2 2 0 00-.547-1.022L3 1"></path></svg>
+                    Enterprise AI Insights
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400">Powered by Gemini Flash - Deep genetic reasoning and trend analysis</p>
+            </div>
+            <button onclick="runAnalysis('full')" class="bg-slate-900 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Generate Full Report
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Data Context Source -->
+            <div class="glass-card p-6 lg:col-span-1 border-t-4 border-blue-500">
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2">Analysis Context</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Select the dataset you want to analyze.</p>
+                
+                <div class="space-y-3">
+                    <button onclick="runAnalysis('trends')" class="w-full text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                        <div class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Usage Trends</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Analyze user behavior over 30 days</div>
+                    </button>
+                    <button onclick="runAnalysis('genetics')" class="w-full text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                        <div class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Genetic Distribution</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Analyze most common combinations</div>
+                    </button>
+                    <button onclick="runAnalysis('security')" class="w-full text-left px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                        <div class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">Security Patterns</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">Detect anomalies in login history</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Response Output -->
+            <div class="glass-card p-8 lg:col-span-2 shadow-sm relative min-h-[400px] flex flex-col">
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">Intelligence Output</h3>
+                    <span id="ai-status" class="text-xs font-bold text-slate-400 uppercase tracking-widest">Awaiting Prompt</span>
+                </div>
+                
+                <div id="ai-output" class="flex-1 overflow-y-auto pr-2 text-slate-700 dark:text-slate-300 leading-relaxed space-y-4">
+                    <div class="h-full flex flex-col items-center justify-center text-center opacity-60">
+                        <svg class="w-16 h-16 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        <p class="text-lg font-medium">Ready for analysis</p>
+                        <p class="text-sm">Select a context source on the left to begin.</p>
+                    </div>
+                </div>
+
+                <div class="pt-6 mt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                    <button onclick="copyOutput()" id="copy-btn" class="text-slate-500 hover:text-blue-500 font-bold text-sm transition-all hidden flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { API } from '../assets/js/api.js';
+
+        window.runAnalysis = async (type) => {
+            const output = document.getElementById('ai-output');
+            const status = document.getElementById('ai-status');
+            const copyBtn = document.getElementById('copy-btn');
+            
+            copyBtn.classList.add('hidden');
+            status.innerText = 'PROCESSING...';
+            status.className = 'text-xs font-bold text-blue-500 uppercase tracking-widest animate-pulse';
+            
+            output.innerHTML = `
+                <div class="flex items-center gap-4 text-blue-600 dark:text-blue-400 mt-4">
+                    <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span class="font-bold">Gemini Flash is analyzing data...</span>
+                </div>
+            `;
+
+            try {
+                // Fetch stats and security logs as context
+                const stats = await API.stats.getOverview();
+                const security = await API.security.logs().catch(() => ({})); // Graceful fail
+                
+                let res;
+                if (type === 'full') {
+                    res = await API.ai.generate('full', { stats, security });
+                } else {
+                    res = await API.ai.insights({ type, stats, security });
+                }
+
+                // Format the markdown-like response
+                const rawText = res.response || res.result || 'No response received.';
+                let formattedHtml = rawText
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 dark:text-white">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em class="text-slate-800 dark:text-slate-200">$1</em>')
+                    .replace(/\n\n/g, '</p><p class="mt-4">')
+                    .replace(/\n/g, '<br>');
+                    
+                // Handle bullet points
+                formattedHtml = formattedHtml.replace(/- (.*?)<br>/g, '<li class="ml-4 list-disc">$1</li>');
+
+                output.innerHTML = `<div class="prose prose-slate dark:prose-invert max-w-none text-sm"><p>${formattedHtml}</p></div>`;
+                
+                status.innerText = 'ANALYSIS COMPLETE';
+                status.className = 'text-xs font-bold text-blue-500 uppercase tracking-widest';
+                copyBtn.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                output.innerHTML = `<div class="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-800 font-medium">Analysis Error: ${err.message}</div>`;
+                status.innerText = 'FAILED';
+                status.className = 'text-xs font-bold text-rose-500 uppercase tracking-widest';
+            }
+        };
+
+        window.copyOutput = () => {
+            const text = document.getElementById('ai-output').innerText;
+            navigator.clipboard.writeText(text);
+            const btn = document.getElementById('copy-btn');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span class="text-blue-500 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!</span>';
+            setTimeout(() => btn.innerHTML = original, 2000);
+        };
+    </script>
+</body>
+</html>

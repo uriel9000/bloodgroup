@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Records | BloodGroup Admin Panel</title>
+    <meta name="description" content="Manage blood stock, track donations, and fulfill blood requests.">
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+    <style>
+        .tab-btn { transition: all .2s; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #e11d48; border-bottom-color: #e11d48; font-weight: 900; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .status-critical { background:rgba(225,29,72,.08); border-left:4px solid #e11d48; }
+        .status-low      { background:rgba(245,158,11,.08); border-left:4px solid #f59e0b; }
+        .status-adequate { background:rgba(16,185,129,.06); border-left:4px solid #3b82f6; }
+        /* Stock Drawer */
+        .stock-drawer { transform: translateX(100%); transition: transform .3s cubic-bezier(.25,.8,.25,1); }
+        .stock-drawer.open { transform: translateX(0); }
+        .drawer-overlay { opacity:0; pointer-events:none; transition: opacity .3s; }
+        .drawer-overlay.show { opacity:1; pointer-events:auto; }
+        .pct-bar { transition: width .6s cubic-bezier(.25,.8,.25,1); }
+        .action-btn { transition: all .15s; }
+        .action-btn:hover { transform: scale(1.06); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col transition-all">
+
+        <!-- Page Header -->
+        <div class="px-8 pt-8 pb-0">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                        <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        Blood Records
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Inventory, donations, and request management</p>
+                </div>
+                <div class="flex items-center gap-3" data-superadmin>
+                    <button onclick="openStockDrawer()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200/40 transition-all action-btn text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Update Stock
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary Mini-Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div class="glass-card p-4 text-center rounded-2xl">
+                    <div class="text-2xl font-black text-rose-600">2</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Critical</div>
+                </div>
+                <div class="glass-card p-4 text-center rounded-2xl">
+                    <div class="text-2xl font-black text-amber-600">2</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Low Stock</div>
+                </div>
+                <div class="glass-card p-4 text-center rounded-2xl">
+                    <div class="text-2xl font-black text-blue-600">4</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Adequate</div>
+                </div>
+                <div class="glass-card p-4 text-center rounded-2xl">
+                    <div class="text-2xl font-black text-slate-700 dark:text-white">473</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Total Units</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-6 border-b border-slate-200 dark:border-slate-800 mb-6">
+                <button class="tab-btn active pb-3 text-sm" data-tab="stock">Blood Stock</button>
+                <button class="tab-btn pb-3 text-sm text-slate-500 dark:text-slate-400" data-tab="donations">Pending Donations</button>
+                <button class="tab-btn pb-3 text-sm text-slate-500 dark:text-slate-400" data-tab="requests">Pending Requests</button>
+            </div>
+        </div>
+
+        <div class="px-8 pb-8">
+
+            <!-- Tab: Blood Stock -->
+            <div class="tab-panel active" id="tab-stock">
+                <div class="glass-card overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                        <h3 class="font-black text-slate-800 dark:text-white">Current Inventory</h3>
+                        <div class="flex items-center gap-3">
+                            <input type="text" id="stock-search" placeholder="Filter by blood type..." class="text-sm bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-rose-400 w-44 text-slate-700 dark:text-slate-300">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50/70 dark:bg-slate-800/50">
+                                <tr>
+                                    <th onclick="sortStock('type')" class="cursor-pointer hover:text-blue-500 px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400 select-none">Blood Type ↕</th>
+                                    <th onclick="sortStock('units')" class="cursor-pointer hover:text-blue-500 px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400 select-none">Units Available ↕</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Stock Level</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Status</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Expiry</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Last Updated</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400" data-superadmin>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="stock-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30 rounded-b-2xl">
+                        <span class="text-xs font-bold text-slate-500" id="stock-pagination-info">Showing 1 to 5</span>
+                        <div class="flex gap-2">
+                            <button onclick="changeStockPage(-1)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all">Prev</button>
+                            <button onclick="changeStockPage(1)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm hover:bg-blue-50 hover:text-blue-600 transition-all">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Pending Donations -->
+            <div class="tab-panel" id="tab-donations">
+                <div class="glass-card overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800">
+                        <h3 class="font-black text-slate-800 dark:text-white">Incoming Donation Offers</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Review and accept voluntary donors</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50/70 dark:bg-slate-800/50">
+                                <tr>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Donor</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Blood Type</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Units</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Date</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Contact</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400" data-superadmin>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="donations-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Pending Requests -->
+            <div class="tab-panel" id="tab-requests">
+                <div class="glass-card overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 dark:border-slate-800">
+                        <h3 class="font-black text-slate-800 dark:text-white">Outgoing Blood Requests</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Hospital and clinic blood requests awaiting fulfillment</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50/70 dark:bg-slate-800/50">
+                                <tr>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Facility</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Blood Type</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Units Needed</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Priority</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400">Requested</th>
+                                    <th class="px-6 py-4 text-xs font-black text-slate-500 dark:text-slate-400" data-superadmin>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800" id="requests-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Drawer Overlay -->
+    <div id="drawer-overlay" class="drawer-overlay fixed inset-0 bg-slate-900/40 z-40" onclick="closeStockDrawer()"></div>
+
+    <!-- Update Stock Drawer -->
+    <aside id="stock-drawer" class="stock-drawer fixed right-0 top-0 w-full sm:w-[420px] h-screen bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 flex flex-col">
+        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <h2 class="text-lg font-black text-slate-800 dark:text-white">Update Blood Stock</h2>
+            <button onclick="closeStockDrawer()" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6 space-y-5">
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Blood Type</label>
+                <select id="drawer-blood-type" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-rose-400 text-slate-800 dark:text-white font-bold">
+                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                    <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Units to Add/Remove</label>
+                <input type="number" id="drawer-units" placeholder="e.g. +50 or -10" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-rose-400 text-slate-800 dark:text-white">
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Operation Type</label>
+                <div class="flex gap-3">
+                    <label class="flex-1 flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-xl p-3 cursor-pointer">
+                        <input type="radio" name="op-type" value="add" checked class="accent-rose-600"> <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Add (Donation)</span>
+                    </label>
+                    <label class="flex-1 flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-xl p-3 cursor-pointer">
+                        <input type="radio" name="op-type" value="remove" class="accent-rose-600"> <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Remove (Used)</span>
+                    </label>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Expiry Date</label>
+                <input type="date" id="drawer-expiry" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-rose-400 text-slate-800 dark:text-white">
+            </div>
+            <div>
+                <label class="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Notes (optional)</label>
+                <textarea id="drawer-notes" rows="3" placeholder="e.g. Batch from Regional Blood Drive 2026..." class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-rose-400 text-slate-800 dark:text-white resize-none text-sm"></textarea>
+            </div>
+            <div id="drawer-success" class="hidden p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-blue-700 dark:text-blue-400 text-sm font-bold text-center">
+                ✓ Stock updated successfully!
+            </div>
+        </div>
+        <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex gap-3">
+            <button onclick="closeStockDrawer()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all text-sm">Cancel</button>
+            <button onclick="submitStockUpdate()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-blue-200/40 action-btn">Save Changes</button>
+        </div>
+    </aside>
+
+    <script>
+        // ── Data ───────────────────────────────────────────────────────────
+        const STOCK = [
+            { type:'A+',  units:124, max:200, status:'adequate', expiry:'2026-08-15', updated:'2026-03-28' },
+            { type:'A-',  units:28,  max:100, status:'low',      expiry:'2026-06-10', updated:'2026-03-27' },
+            { type:'B+',  units:89,  max:200, status:'adequate', expiry:'2026-09-01', updated:'2026-03-29' },
+            { type:'B-',  units:12,  max:100, status:'low',      expiry:'2026-05-22', updated:'2026-03-26' },
+            { type:'AB+', units:45,  max:100, status:'adequate', expiry:'2026-07-30', updated:'2026-03-25' },
+            { type:'AB-', units:3,   max:50,  status:'critical', expiry:'2026-04-12', updated:'2026-03-29' },
+            { type:'O+',  units:167, max:200, status:'adequate', expiry:'2026-10-05', updated:'2026-03-29' },
+            { type:'O-',  units:5,   max:100, status:'critical', expiry:'2026-04-08', updated:'2026-03-29' },
+        ];
+
+        const DONATIONS = [
+            { id:1, donor:'Marcus Johnson',   bloodType:'O+',  units:1, date:'2026-03-30', contact:'+260-97-1234567' },
+            { id:2, donor:'Amara Osei',       bloodType:'A-',  units:1, date:'2026-03-30', contact:'+260-96-7654321' },
+            { id:3, donor:'Chen Wei',         bloodType:'B+',  units:1, date:'2026-03-31', contact:'+260-95-9988776' },
+            { id:4, donor:'Fatima Al-Rashid', bloodType:'AB-', units:1, date:'2026-04-01', contact:'+260-97-4433221' },
+        ];
+
+        const REQUESTS = [
+            { id:1, facility:'City General Hospital',    bloodType:'O-',  units:3, priority:'urgent', requested:'2026-03-29 08:14' },
+            { id:2, facility:"St. Mary's Clinic",        bloodType:'AB-', units:1, priority:'urgent', requested:'2026-03-29 09:42' },
+            { id:3, facility:'Regional Medical Center',  bloodType:'B+',  units:5, priority:'normal', requested:'2026-03-29 11:00' },
+            { id:4, facility:'University Hospital',      bloodType:'A-',  units:2, priority:'normal', requested:'2026-03-28 18:33' },
+            { id:5, facility:'North District Clinic',    bloodType:'A+',  units:4, priority:'low',    requested:'2026-03-28 14:10' },
+        ];
+
+        // ── Render Functions ───────────────────────────────────────────────
+        function statusBadge(s) {
+            return s === 'critical'
+                ? '<span class="px-2.5 py-1 bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 rounded-lg text-[10px] font-black uppercase tracking-wider">Critical</span>'
+                : s === 'low'
+                ? '<span class="px-2.5 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-lg text-[10px] font-black uppercase tracking-wider">Low</span>'
+                : '<span class="px-2.5 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase tracking-wider">Adequate</span>';
+        }
+
+        let stockPage = 1;
+        const stockItemsPerPage = 5;
+        let stockSortCol = 'type';
+        let stockSortDir = 1;
+        let currentFilter = '';
+
+        window.sortStock = (col) => {
+            if(stockSortCol === col) stockSortDir *= -1;
+            else { stockSortCol = col; stockSortDir = 1; }
+            renderStock(currentFilter);
+        };
+
+        window.changeStockPage = (dir) => {
+            stockPage += dir;
+            renderStock(currentFilter);
+        };
+
+        function renderStock(filter='') {
+            currentFilter = filter;
+            const tbody = document.getElementById('stock-tbody');
+            
+            // Filter
+            let data = STOCK.filter(s => !filter || s.type.toLowerCase().includes(filter.toLowerCase()));
+            
+            // Sort
+            data.sort((a, b) => {
+                let valA = a[stockSortCol];
+                let valB = b[stockSortCol];
+                if(typeof valA === 'string') valA = valA.toLowerCase();
+                if(typeof valB === 'string') valB = valB.toLowerCase();
+                if(valA < valB) return -1 * stockSortDir;
+                if(valA > valB) return 1 * stockSortDir;
+                return 0;
+            });
+
+            // Paginate
+            const total = data.length;
+            const totalPages = Math.ceil(total / stockItemsPerPage) || 1;
+            if(stockPage < 1) stockPage = 1;
+            if(stockPage > totalPages) stockPage = totalPages;
+            
+            const startIdx = (stockPage - 1) * stockItemsPerPage;
+            const paginatedData = data.slice(startIdx, startIdx + stockItemsPerPage);
+
+            const infoEl = document.getElementById('stock-pagination-info');
+            if(infoEl) infoEl.innerText = `Showing ${total === 0 ? 0 : startIdx + 1} to ${Math.min(startIdx + stockItemsPerPage, total)} of ${total} entries`;
+
+            tbody.innerHTML = paginatedData.map(s => {
+                const pct = Math.round((s.units / s.max)*100);
+                const barColor = s.status==='critical' ? 'bg-rose-500' : s.status==='low' ? 'bg-amber-500' : 'bg-blue-500';
+                return `<tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-all">
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center justify-center w-12 h-10 rounded-xl text-sm font-black
+                            ${s.status==='critical'?'bg-rose-100 text-rose-700':s.status==='low'?'bg-amber-100 text-amber-700':'bg-slate-100 text-slate-700'}">${s.type}</span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-800 dark:text-white font-black text-lg">${s.units} <span class="text-xs font-medium text-slate-400">/ ${s.max}</span></td>
+                    <td class="px-6 py-4 min-w-[140px]">
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full pct-bar ${barColor}" style="width:${pct}%"></div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500">${pct}%</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">${statusBadge(s.status)}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">${s.expiry}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">${s.updated}</td>
+                    <td class="px-6 py-4" data-superadmin>
+                        <button onclick="openStockDrawer('${s.type}')" class="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all">Update</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderDonations() {
+            document.getElementById('donations-tbody').innerHTML = DONATIONS.map(d => `
+                <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-all">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 text-white flex items-center justify-center font-black text-sm">${d.donor[0]}</div>
+                            <span class="font-bold text-slate-700 dark:text-slate-300 text-sm">${d.donor}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4"><span class="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-black">${d.bloodType}</span></td>
+                    <td class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-400">${d.units} unit</td>
+                    <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">${d.date}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">${d.contact}</td>
+                    <td class="px-6 py-4" data-superadmin>
+                        <div class="flex gap-2">
+                            <button onclick="this.closest('tr').remove()" class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-all">Accept</button>
+                            <button onclick="this.closest('tr').remove()" class="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all">Decline</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderRequests() {
+            document.getElementById('requests-tbody').innerHTML = REQUESTS.map(r => {
+                const pc = r.priority==='urgent' ? 'bg-rose-100 text-rose-700' : r.priority==='normal' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600';
+                return `<tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/30 transition-all">
+                    <td class="px-6 py-4 text-sm font-bold text-slate-700 dark:text-slate-300">${r.facility}</td>
+                    <td class="px-6 py-4"><span class="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-black">${r.bloodType}</span></td>
+                    <td class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-400">${r.units} units</td>
+                    <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${pc}">${r.priority}</span></td>
+                    <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">${r.requested}</td>
+                    <td class="px-6 py-4" data-superadmin>
+                        <div class="flex gap-2">
+                            <button onclick="this.closest('tr').remove()" class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-all">Fulfill</button>
+                            <button onclick="this.closest('tr').remove()" class="px-3 py-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all">Reject</button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ── Tabs ──────────────────────────────────────────────────────────
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // ── Stock Drawer ──────────────────────────────────────────────────
+        window.openStockDrawer = (type = '') => {
+            if (type) document.getElementById('drawer-blood-type').value = type;
+            document.getElementById('stock-drawer').classList.add('open');
+            document.getElementById('drawer-overlay').classList.add('show');
+        };
+        window.closeStockDrawer = () => {
+            document.getElementById('stock-drawer').classList.remove('open');
+            document.getElementById('drawer-overlay').classList.remove('show');
+        };
+        window.submitStockUpdate = () => {
+            const successEl = document.getElementById('drawer-success');
+            successEl.classList.remove('hidden');
+            if(window.Toast) window.Toast.trigger('success', 'Blood stock successfully updated in registry.');
+            setTimeout(() => {
+                successEl.classList.add('hidden');
+                closeStockDrawer();
+            }, 1500);
+        };
+
+        // ── Search ───────────────────────────────────────────────────────
+        document.getElementById('stock-search').addEventListener('input', e => renderStock(e.target.value));
+
+        // ── Init ──────────────────────────────────────────────────────────
+        renderStock();
+        renderDonations();
+        renderRequests();
+        if (window.RoleGuard) RoleGuard.apply();
+    </script>
+</body>
+</html>

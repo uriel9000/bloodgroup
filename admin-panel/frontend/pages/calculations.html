@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculations | Admin Panel V3</title>
+    <link rel="stylesheet" href="../assets/css/tailwind.min.css">
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="../assets/js/theme.js"></script>
+    <script src="../../../js/runtime-config.js"></script>
+    <script src="../components/layout.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 transition-all flex">
+    <!-- Sidebar Placeholder (injected by layout.js) -->
+    <div class="sidebar lg:flex flex-col w-[280px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 fixed h-full z-40 hidden"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-[280px] min-h-screen flex flex-col p-8 transition-all">
+        <!-- layout.js injects navbar + footer -->
+
+        <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Calculations</h1>
+                <p class="text-slate-500 dark:text-slate-400">History of all genetic predictions.</p>
+            </div>
+            <div class="flex gap-3 w-full sm:w-auto">
+                <div class="relative flex-1 sm:flex-none">
+                    <input type="text" id="calc-search" placeholder="Search parents..."
+                        class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm dark:text-white">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-[2rem] shadow-sm overflow-hidden flex-1 flex flex-col">
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left whitespace-nowrap">
+                    <thead class="bg-slate-50/50 dark:bg-slate-800/50">
+                        <tr>
+                            <th class="px-8 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">ID</th>
+                            <th class="px-8 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Parent 1</th>
+                            <th class="px-8 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Parent 2</th>
+                            <th class="px-8 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Primary Result</th>
+                            <th class="px-8 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Date</th>
+                            <th class="px-8 py-4 font-bold text-slate-600 dark:text-slate-300 text-sm">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calc-tbody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                        <!-- Loaded by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-6 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <span class="text-slate-500 dark:text-slate-400 text-sm">Showing <span id="page-count">-</span> logs</span>
+                <div class="flex gap-2" id="page-btns"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI Drawer -->
+    <aside id="ai-drawer" class="ai-drawer closed fixed right-0 top-0 w-96 h-screen bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-8 flex flex-col">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Genetic Explanation
+            </h2>
+            <button data-toggle-drawer class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div id="ai-content" class="flex-1 overflow-y-auto space-y-4 text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+            <p class="text-center text-slate-400 py-10 italic">Select a calculation to explain with Gemini Flash.</p>
+        </div>
+    </aside>
+
+    <script type="module">
+        import { API } from '../assets/js/api.js?v=2.3';
+        import { Store } from '../assets/js/app.js?v=2.3';
+
+        let currentPage = 1;
+
+        async function loadCalculations(page = 1) {
+            currentPage = page;
+            const search = document.getElementById('calc-search').value;
+            const tbody = document.getElementById('calc-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" class="px-8 py-10 text-center text-slate-400">Loading...</td></tr>';
+            try {
+                const data = await API.calculations.list(page, search);
+                if (!data.records || data.records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="px-8 py-10 text-center text-slate-500 italic">No calculations found.</td></tr>';
+                    document.getElementById('page-count').innerText = '0';
+                    return;
+                }
+                renderTable(data.records);
+                renderPagination(data);
+                document.getElementById('page-count').innerText = `${data.records.length} of ${data.total}`;
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-8 py-10 text-center text-rose-500">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderTable(records) {
+            const tbody = document.getElementById('calc-tbody');
+            tbody.innerHTML = records.map(reg => {
+                let topResult = 'N/A';
+                try {
+                    const parsed = reg.result_json ? JSON.parse(reg.result_json) : {};
+                    const preds = parsed.results || parsed.predictions || [];
+                    const top = preds[0] || {};
+                    topResult = (top.group || top.bloodGroup || 'N/A') + (top.probability ? ` (${top.probability}%)` : '');
+                } catch(e) {}
+                return `
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all group text-slate-700 dark:text-slate-300">
+                        <td class="px-8 py-4 text-slate-400 font-mono text-sm">#${reg.id}</td>
+                        <td class="px-8 py-4"><span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 rounded-lg font-bold text-sm">${reg.parent1}</span></td>
+                        <td class="px-8 py-4"><span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg font-bold text-sm">${reg.parent2}</span></td>
+                        <td class="px-8 py-4 font-semibold">${topResult}</td>
+                        <td class="px-8 py-4 text-slate-500 text-sm">${new Date(reg.created_at).toLocaleDateString()}</td>
+                        <td class="px-8 py-4">
+                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                <button onclick="window.explain('${reg.parent1}','${reg.parent2}','${encodeURIComponent(reg.result_json)}')" class="p-2 bg-slate-900 dark:bg-slate-700 text-white rounded-xl hover:bg-blue-500 transition-all" title="AI Explain">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </button>
+                                <button onclick="window.deleteCalc(${reg.id})" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-all" title="Delete">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+
+        function renderPagination(data) {
+            const container = document.getElementById('page-btns');
+            let html = '';
+            for (let i = 1; i <= data.totalPages; i++) {
+                html += `<button onclick="window.setPage(${i})" class="w-9 h-9 rounded-xl font-bold text-sm transition-all ${i === currentPage ? 'bg-blue-500 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'}">${i}</button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        window.setPage = (n) => loadCalculations(n);
+
+        window.explain = async (p1, p2, encodedJson) => {
+            Store.toggleDrawer(true);
+            const content = document.getElementById('ai-content');
+            content.innerHTML = '<div class="flex items-center gap-3 py-10 font-bold text-blue-500 animate-pulse"><div class="spinner border-2 border-blue-500 border-t-transparent rounded-full w-4 h-4 animate-spin"></div> Gemini is reasoning...</div>';
+            try {
+                const parentsStr = p1 + ' & ' + p2;
+                const res = await API.ai.explain(parentsStr, JSON.parse(decodeURIComponent(encodedJson)));
+                const text = res.response || res.result || 'No explanation available.';
+                content.innerHTML = `<div class="prose prose-emerald dark:prose-invert text-sm whitespace-pre-line leading-relaxed">${text}</div>`;
+            } catch (err) {
+                content.innerHTML = `<p class="text-rose-500 font-bold p-4">Error: ${err.message}</p>`;
+            }
+        };
+
+        window.deleteCalc = async (id) => {
+            if (confirm('Delete this log entry?')) {
+                await API.calculations.delete(id);
+                loadCalculations(currentPage);
+            }
+        };
+
+        document.getElementById('calc-search').oninput = () => loadCalculations(1);
+        loadCalculations();
+    </script>
+</body>
+</html>
