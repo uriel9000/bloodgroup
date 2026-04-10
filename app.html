@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/styles.css?v=10" />
+    <link rel="stylesheet" href="css/styles.css?v=11" />
     <script src="js/runtime-config.js"></script>
     <script src="js/landing.js?v=2" defer></script>
 
@@ -35,94 +35,168 @@
           </button>
         </div>
         <h1>Blood Group Predictor</h1>
-        <p>Calculate child blood group probabilities using genetics</p>
+        <p>Medical Research & Genetic Analysis Suite</p>
       </header>
 
       <main>
-        <!-- Input Card -->
-        <section class="glass-card">
-          <div class="input-grid">
-            <div class="input-field">
-              <label for="parent1">Parent 1 Blood Group</label>
-              <select id="parent1">
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
+        <!-- Feature Switcher Tabs -->
+        <div class="feature-tabs">
+          <button id="tabGenetics" class="tab-btn active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21a8 8 0 0 1 13.29-6"></path><circle cx="10" cy="8" r="5"></circle><path d="M19 16v6"></path><path d="M22 19h-6"></path></svg>
+            Genetics Prediction
+          </button>
+          <button id="tabClinical" class="tab-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"></path><path d="M12 3v18"></path></svg>
+            Clinical Compatibility
+          </button>
+        </div>
+
+        <!-- Section 1: Genetics Prediction -->
+        <div id="geneticsSection">
+          <!-- Input Card -->
+          <section class="glass-card">
+            <div class="input-grid">
+              <div class="input-field">
+                <label for="parent1">Parent 1 Blood Group</label>
+                <select id="parent1">
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+              <div class="input-field">
+                <label for="parent2">Parent 2 Blood Group</label>
+                <select id="parent2">
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
             </div>
-            <div class="input-field">
-              <label for="parent2">Parent 2 Blood Group</label>
-              <select id="parent2">
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
+            <button id="calculateBtn" class="btn-primary">Predict Results</button>
+          </section>
+
+          <!-- Results Section (Hidden by default) -->
+          <section id="resultSection" style="display: none">
+            <div class="results-container">
+              <div class="result-list" id="resultList">
+                <!-- Result items will be injected here -->
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="probabilityChart"></canvas>
+              </div>
+            </div>
+          </section>
+
+          <!-- Genetic Analysis Section (Hidden by default) -->
+          <section id="analysisSection" style="display: none" class="analysis-section">
+            <div class="divider">
+              <span>Genetic Analysis</span>
+            </div>
+            
+            <div class="analysis-grid">
+              <!-- Rh Risk Indicator -->
+              <div id="rhRiskCard" class="card-glass risk-card">
+                <div class="risk-header">
+                  <h3>Rh Compatibility Risk</h3>
+                  <span id="riskBadge" class="badge">Safe</span>
+                </div>
+                <p id="riskMessage">No risks detected for this combination.</p>
+              </div>
+
+              <!-- AI Insights Panel -->
+              <div id="aiInsightsCard" class="card-glass ai-card">
+                <div class="card-header">
+                  <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  <h3>AI Educational Insights</h3>
+                </div>
+                <div id="aiInsightsContent" class="ai-content">
+                  Waiting for AI analysis...
+                </div>
+                <div class="clinical-disclaimer">
+                  <p>This is educational and not a medical diagnosis.</p>
+                </div>
+              </div>
+
+              <!-- Genotype Probabilities Chart -->
+              <div class="card-glass genotype-card">
+                <h3>Genotype Probability Breakdown</h3>
+                <div class="genotype-list" id="genotypeList">
+                  <!-- Genotypes will be injected here -->
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Section 2: Clinical Compatibility -->
+        <div id="clinicalSection" style="display: none">
+          <div class="glass-card">
+            <div class="input-grid">
+              <div class="input-field">
+                <label for="personA">Person A (Donor/Mother)</label>
+                <select id="personA">
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+              <div class="input-field">
+                <label for="personB">Person B (Recipient/Father)</label>
+                <select id="personB">
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
+            <button id="checkCompatibilityBtn" class="btn-primary">Check Compatibility</button>
+          </div>
+
+          <!-- Compatibility Results -->
+          <div id="clinicalResult" style="display: none" class="clinical-grid">
+            <div id="compatibilityStatus" class="glass-card compatibility-status-card">
+              <div class="status-icon" id="statusIcon">?</div>
+              <h2 id="statusTitle" style="margin-bottom: 0.5rem">Checking...</h2>
+              <p id="statusSubtitle" style="color: var(--text-secondary)">Determining biological compatibility</p>
+              
+              <div class="clinical-details">
+                <div class="detail-pill">
+                  <h4>Transfusion</h4>
+                  <p id="transfusionStatus">Pending</p>
+                </div>
+                <div class="detail-pill">
+                  <h4>Pregnancy Risk</h4>
+                  <p id="pregnancyStatus">Pending</p>
+                </div>
+              </div>
+
+              <div class="clinical-explanation" id="clinicalExplanation">
+                Select blood groups and run analysis to see detailed clinical insights.
+              </div>
             </div>
           </div>
-          <button id="calculateBtn" class="btn-primary">Predict Results</button>
-        </section>
-
-        <!-- Results Section (Hidden by default) -->
-        <section id="resultSection" style="display: none">
-          <div class="results-container">
-            <div class="result-list" id="resultList">
-              <!-- Result items will be injected here -->
-            </div>
-            <div class="chart-wrapper">
-              <canvas id="probabilityChart"></canvas>
-            </div>
-          </div>
-        </section>
-
-        <!-- Genetic Analysis Section (Hidden by default) -->
-        <section id="analysisSection" style="display: none" class="analysis-section">
-          <div class="divider">
-            <span>Genetic Analysis</span>
-          </div>
-          
-          <div class="analysis-grid">
-            <!-- Rh Risk Indicator -->
-            <div id="rhRiskCard" class="card-glass risk-card">
-              <div class="risk-header">
-                <h3>Rh Compatibility Risk</h3>
-                <span id="riskBadge" class="badge">Safe</span>
-              </div>
-              <p id="riskMessage">No risks detected for this combination.</p>
-            </div>
-
-            <!-- AI Insights Panel -->
-            <div id="aiInsightsCard" class="card-glass ai-card">
-              <div class="card-header">
-                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                <h3>AI Educational Insights</h3>
-              </div>
-              <div id="aiInsightsContent" class="ai-content">
-                Waiting for AI analysis...
-              </div>
-              <div class="clinical-disclaimer">
-                <p>This is educational and not a medical diagnosis.</p>
-              </div>
-            </div>
-
-            <!-- Genotype Probabilities Chart -->
-            <div class="card-glass genotype-card">
-              <h3>Genotype Probability Breakdown</h3>
-              <div class="genotype-list" id="genotypeList">
-                <!-- Genotypes will be injected here -->
-              </div>
-            </div>
-          </div>
-        </section>
+        </div>
 
         <!-- History Section -->
         <section class="history-section">
@@ -146,8 +220,9 @@
 
     <!-- Scripts -->
     <script src="js/genetics.js?v=9"></script>
+    <script src="js/clinical.js?v=9"></script>
     <script src="js/db.js?v=9"></script>
-    <script src="js/app.js?v=9"></script>
+    <script src="js/app.js?v=11"></script>
     <script>
       if ("serviceWorker" in navigator) {
         // Purge old versions
