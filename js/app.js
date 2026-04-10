@@ -15,11 +15,34 @@ const APP = {
     init: async function() {
         console.log('App initializing...');
         this.bindEvents();
+        this.initTabs();
         await this.loadHistory();
+    },
+
+    initTabs: function() {
+        const tabGenetics = document.getElementById('tabGenetics');
+        const tabClinical = document.getElementById('tabClinical');
+        const geneticsSection = document.getElementById('geneticsSection');
+        const clinicalSection = document.getElementById('clinicalSection');
+
+        tabGenetics.addEventListener('click', () => {
+            tabGenetics.classList.add('active');
+            tabClinical.classList.remove('active');
+            geneticsSection.style.display = 'block';
+            clinicalSection.style.display = 'none';
+        });
+
+        tabClinical.addEventListener('click', () => {
+            tabClinical.classList.add('active');
+            tabGenetics.classList.remove('active');
+            clinicalSection.style.display = 'block';
+            geneticsSection.style.display = 'none';
+        });
     },
 
     bindEvents: function() {
         document.getElementById('calculateBtn').addEventListener('click', () => this.handleCalculate());
+        document.getElementById('checkCompatibilityBtn').addEventListener('click', () => this.handleClinicalCalculate());
     },
 
     handleCalculate: async function() {
@@ -77,6 +100,58 @@ const APP = {
         }, limit);
 
         this.loadHistory();
+    },
+
+    handleClinicalCalculate: function() {
+        const p1 = document.getElementById('personA').value;
+        const p2 = document.getElementById('personB').value;
+
+        const analysis = CLINICAL.analyze(p1, p2);
+        this.displayClinicalResults(analysis);
+    },
+
+    displayClinicalResults: function(analysis) {
+        const resultDiv = document.getElementById('clinicalResult');
+        const statusCard = document.getElementById('compatibilityStatus');
+        const icon = document.getElementById('statusIcon');
+        const title = document.getElementById('statusTitle');
+        const subtitle = document.getElementById('statusSubtitle');
+        const transfusion = document.getElementById('transfusionStatus');
+        const pregnancy = document.getElementById('pregnancyStatus');
+        const explanation = document.getElementById('clinicalExplanation');
+
+        resultDiv.style.display = 'block';
+
+        // Set Transfusion Status
+        transfusion.innerText = analysis.transfusion.status;
+        transfusion.style.color = analysis.transfusion.compatible ? '#27ae60' : '#e74c3c';
+
+        // Set Pregnancy Status
+        pregnancy.innerText = analysis.pregnancy.status;
+        pregnancy.style.color = analysis.pregnancy.risk ? '#f1c40f' : '#27ae60';
+
+        // Overall Status Styling
+        statusCard.className = 'glass-card compatibility-status-card';
+        if (analysis.transfusion.compatible && !analysis.pregnancy.risk) {
+            statusCard.classList.add('status-compatible');
+            icon.innerText = '✓';
+            title.innerText = 'Highly Compatible';
+            subtitle.innerText = 'Biological & clinical indicators are overall positive.';
+        } else if (!analysis.transfusion.compatible) {
+            statusCard.classList.add('status-incompatible');
+            icon.innerText = '✕';
+            title.innerText = 'Incompatible / High Risk';
+            subtitle.innerText = 'Critical clinical warnings detected.';
+        } else {
+            statusCard.classList.add('status-warning');
+            icon.innerText = '!';
+            title.innerText = 'Compatible with Warnings';
+            subtitle.innerText = 'Biological compatibility exists but requires medical attention.';
+        }
+
+        explanation.innerText = analysis.transfusion.explanation + '\n\n' + analysis.pregnancy.message;
+        
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
     },
 
     displayResults: function(results) {
