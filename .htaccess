@@ -2,7 +2,7 @@
 Options -Indexes
 
 <IfModule mod_headers.c>
-    # Mitigate Cross-Site Scripting (XSS) and stop page loading if an attack is detected
+    # Mitigate Cross-Site Scripting (XSS)
     Header set X-XSS-Protection "1; mode=block"
 
     # Block MIME type sniffing strictly
@@ -11,8 +11,8 @@ Options -Indexes
     # Block Clickjacking by disallowing embedding on external domains
     Header set X-Frame-Options "SAMEORIGIN"
 
-    # Restrict unauthenticated origins fetching internal data / generic CSP
-    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;"
+    # Content Security Policy - COMPLETE (allows InfinityFree error pages)
+    Header set Content-Security-Policy "default-src 'self' https://errors.infinityfree.net; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://errors.infinityfree.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://errors.infinityfree.net; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://errors.infinityfree.net; object-src 'none'"
 </IfModule>
 
 # Block sensitive internal codebase assets (.md logs, schemas, powershell scripts)
