@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,6 +15,577 @@
   <link rel="stylesheet" href="css/landing.css?v=1" />
   <script src="js/runtime-config.js"></script>
   <script src="js/landing.js?v=1" defer></script>
+  <style>
+    /* ----- Hicks Law UI Overrides – no gradients, clean type, responsive ----- */
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --border-light: #e2e8f0;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --medical-blue: #0f6e9e;
+      --warning-bg: #fff7ed;
+      --warning-border: #fdba74;
+      --radius-card: 16px;
+      --radius-btn: 40px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-md: 0 8px 20px rgba(0,0,0,0.05);
+      --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---------- Typography ---------- */
+    h1, h2, h3, h4 {
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      margin-bottom: 0.75rem;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 1.0625rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ---------- Layout Containers ---------- */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---------- Navigation (simplified, more whitespace) ---------- */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-light);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 1.35rem;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 28px;
+      height: 28px;
+      fill: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    /* buttons in nav */
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border-light);
+      border-radius: 30px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text-primary);
+    }
+
+    .btn {
+      display: inline-block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.65rem 1.5rem;
+      border-radius: var(--radius-btn);
+      text-decoration: none;
+      text-align: center;
+      transition: background 0.2s, color 0.2s, border 0.2s;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-outline:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* ---------- Hero (simplified, centred, airy) ---------- */
+    .hero {
+      text-align: center;
+      padding: 5rem 1.5rem 4rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.35rem 1rem;
+      border-radius: 30px;
+      margin-bottom: 1.5rem;
+      border: 1px solid #c7d2fe;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    /* ---------- Sections (uniform spacing, clean cards) ---------- */
+    section {
+      padding: 4rem 1.5rem;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      max-width: 650px;
+      margin: 0 auto 3rem;
+      color: var(--text-secondary);
+    }
+
+    /* ---------- Features grid ---------- */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      padding: 2rem 1.75rem;
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s;
+      text-align: left;
+    }
+
+    .feature-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+    }
+
+    .feature-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: #eff6ff;
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      color: var(--accent);
+    }
+
+    .feature-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .text-medical-blue {
+      color: var(--medical-blue);
+      background: #e6f0f6;
+    }
+
+    /* ---------- Steps (How it works) ---------- */
+    .steps-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-card);
+      padding: 1.75rem;
+      flex: 1 1 220px;
+      box-shadow: var(--shadow-sm);
+      align-items: flex-start;
+    }
+
+    .step-number {
+      background: var(--accent);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .step-content h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-content p {
+      font-size: 0.95rem;
+      margin-bottom: 0;
+    }
+
+    /* ---------- Trust section (simple items) ---------- */
+    .trust-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .trust-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #f8fafc;
+      padding: 0.9rem 1.8rem;
+      border-radius: 60px;
+      border: 1px solid var(--border-light);
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .trust-item svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent);
+      fill: none;
+    }
+
+    /* ---------- Education section ---------- */
+    .education-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3rem;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      padding: 2.5rem;
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .education-content {
+      flex: 2 1 380px;
+    }
+
+    .education-content h2 {
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    .warning-box {
+      background: var(--warning-bg);
+      border-left: 6px solid var(--warning-border);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-top: 1.5rem;
+    }
+
+    .warning-box h4 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.15rem;
+      margin-bottom: 0.75rem;
+      color: #9a3412;
+    }
+
+    .warning-box p {
+      margin-bottom: 0;
+      color: #7c2d12;
+      font-size: 0.95rem;
+    }
+
+    .education-image {
+      flex: 1 1 200px;
+      display: flex;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .education-image svg {
+      width: 100%;
+      max-width: 220px;
+      height: auto;
+      stroke: var(--accent);
+    }
+
+    /* ---------- CTA section (simplified) ---------- */
+    .cta-section {
+      text-align: center;
+      background: var(--surface);
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .cta-section h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    .cta-section p {
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .cta-section .btn-outline {
+      border-width: 1px;
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+
+    /* ---------- Footer (clean, columns) ---------- */
+    footer {
+      background: var(--surface);
+      padding: 3rem 1.5rem 2rem;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 2.5rem;
+      max-width: 1100px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .footer-brand p {
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+      max-width: 300px;
+    }
+
+    .link-group h4 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .link-group a {
+      display: block;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 0.6rem;
+      transition: color 0.2s;
+    }
+
+    .link-group a:hover {
+      color: var(--accent);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-light);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .clinical-disclaimer-footer {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      background: #f1f5f9;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      color: #334155;
+      border-left: 4px solid #94a3b8;
+    }
+
+    /* ---------- Animation (subtle, not distractive) ---------- */
+    .animate-on-scroll {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    /* ---------- Responsive tweaks ---------- */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .hero {
+        padding: 3rem 1rem 2rem;
+      }
+
+      .hero-cta .btn {
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .step-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .education-section {
+        padding: 1.75rem;
+      }
+
+      .trust-item {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .cta-section .btn-outline {
+        display: block;
+        margin: 0.75rem auto;
+        max-width: 240px;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .feature-card {
+        padding: 1.5rem;
+      }
+
+      .nav-links {
+        gap: 0.75rem;
+      }
+
+      .nav-links a {
+        font-size: 0.85rem;
+      }
+
+      .btn {
+        padding: 0.55rem 1.2rem;
+        font-size: 0.85rem;
+      }
+    }
+
+    /* Remove any gradient backgrounds from original styles if present */
+    [class*="gradient"], .hero, .cta-section, .trust-section {
+      background-image: none !important;
+    }
+
+    /* Ensure light backgrounds */
+    section#how-it-works {
+      background-color: #f8fafc !important; /* solid */
+    }
+  </style>
 </head>
 <body>
 
@@ -37,9 +608,8 @@
 
   <!-- Hero Section -->
   <header class="hero">
-    <div class="badge animate-on-scroll">v2.0 PWA Ready</div>
     <h1 class="animate-on-scroll">Understand Your Blood Compatibility Before Starting a Family</h1>
-    <p class="animate-on-scroll">Predict your child's blood group and learn about genetic compatibility with our intelligent analysis tool. Secure, fast, and scientifically aligned.</p>
+    <p class="animate-on-scroll">Predict your child's blood group and learn about genetic compatibility with our intelligent analysis tool. Secure, fast and scientifically aligned.</p>
     <div class="hero-cta animate-on-scroll">
       <a href="app.html" class="btn btn-primary">Start Prediction</a>
       <a href="#education" class="btn btn-outline">Learn More</a>
@@ -87,7 +657,7 @@
   </section>
 
   <!-- How It Works -->
-  <section id="how-it-works" style="background-color: rgba(0,0,0,0.02);">
+  <section id="how-it-works" style="background-color: #f8fafc;">
     <h2 class="section-title animate-on-scroll">How It Works</h2>
     <p class="section-subtitle animate-on-scroll">Four simple steps to gain clarity on genetic inheritance.</p>
     
@@ -172,8 +742,7 @@
     <h2>Ready to Predict?</h2>
     <p>Launch the predictor tool now to generate accurate probabilities for your specific combination.</p>
     <div>
-      <a href="app.html" class="btn btn-outline" style="margin-right: 1rem; border-width: 2px;">Launch Predictor</a>
-      <a href="admin-panel/frontend/pages/login.html" class="btn btn-outline" style="border: none; text-decoration: underline;">Admin Login</a>
+      <a href="app.html" class="btn btn-outline" style="border-width: 1px;">Launch Predictor</a>
     </div>
   </section>
 
@@ -185,7 +754,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           BloodGroup AI
         </a>
-        <p>A smart, fast, and secure genetic analysis service helping families and educators understand the science behind blood types.</p>
+        <p>A smart, fast and secure genetic analysis service helping families and educators understand the science behind blood types.</p>
       </div>
       
       <div class="link-group">
